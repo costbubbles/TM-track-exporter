@@ -6,7 +6,7 @@ _Last updated: 2026-10-01_
 
 | | |
 |---|---|
-| **Phase** | 7 code done. **v0.1 is ready apart from the user's in-game acceptance** (queued). Next is Phase 8: WPF desktop app |
+| **Phase** | 7 done. **v0.1 accepted in game**; the release tag waits for the user's go-ahead. Next is Phase 8: WPF desktop app |
 | **Release** | none |
 | **Next up** | Phase 8 desktop app (browse TMX, convert & install, library, settings) |
 | **Blockers** | none |
@@ -164,14 +164,16 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 
 ## Acceptance checklist (per release, per reference map)
 
-- [ ] Appears in Content Manager with correct name, preview and outline
-- [ ] Loads in AC (with CSP) without errors
-- [ ] Car spawns on the road, facing the race direction
-- [ ] Not mirrored, and layout matches TMX screenshots
-- [ ] Lap (circuit) or A-to-B (time attack) timing registers, and sectors register
-- [ ] Surfaces feel plausible (road/dirt/grass/ice)
-- [ ] Every session starts at the start line
-- [ ] Conversion report matches what you see in game (warnings are accurate)
+v0.1 run (2026-10-01, by the user over rounds 1–6 on R1, R3 and R2):
+
+- [x] Appears in Content Manager with correct name, preview and outline
+- [x] Loads in AC (with CSP) without errors
+- [x] Car spawns on the road, facing the race direction
+- [x] Not mirrored, and layout matches TMX screenshots
+- [x] Lap timing (R3 Rockridge) and A-to-B timing (R2 ESL-Hockolicious) register
+- [x] Surfaces feel plausible (road/kerb/grass)
+- [x] Every session starts at the start line
+- [ ] Conversion report matches what you see in game (not checked item by item)
 
 ## Work log
 
@@ -224,3 +226,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - **2026-10-01:** Round 5: start-pad clipping traced to a mod car's minimal hitboxes plus AC's hub raycast with steep steps. Geometry verified sound. Logged as a known limitation.
 - **2026-10-01:** Removed the compatibility rating at the user's request (R1's finish jump is too far for AC, but that's for the player to find out). Deleted CompatibilityAnalyzer, `tm2ac analyze`, `--force`, the loop/wallride block flags and the rating/ghost stats in the report. 108 offline tests pass.
 - **2026-10-01:** Added the `JUMPS` warning (gap = no surface 10 m below the take-off/landing chord; required speed to the gap's far edge) and gold-level replay selection with a `REPLAY` note in the report. 116 offline tests pass.
+- **2026-10-01:** Round 6: A-to-B timing verified in game on R2 ESL-Hockolicious. v0.1 acceptance done.

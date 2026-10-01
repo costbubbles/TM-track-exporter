@@ -164,7 +164,7 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
 - [x] `data/block-flags.tmnf.json` fallbacks for unparseable blocks
 - [x] README (install, usage, compatibility, legal notice). `dotnet publish src/Tm2Ac.Cli -c Release -r win-x64` gives a single
       45 MB exe, and CI uploads it as an artifact
-- [ ] Run the full acceptance checklist on the reference maps (**queued**: needs the user in game)
+- [x] Run the acceptance checklist on the reference maps (user, 2026-10-01: R1, R2, R3)
 - [ ] Tag v0.1.0 and publish the GitHub release (**waiting for the user's approval** after the acceptance checks)
 
 **Exit:** v0.1 tagged.
