@@ -260,14 +260,13 @@ content/tracks/<trackId>/
 - Gate width = road width at that point (from the block definition), plus 1 m margin each side.
 
 ### 7.3 Spawns and pits
-- `AC_START_0..N-1` (grid) and `AC_PIT_0..N-1` (pits), with N = `--pitboxes`.
-- Placement strategy, in order:
-  1. Along the route **behind** the start gate on existing road. This works only if there is enough drivable surface,
-     which is checked against collision geometry.
-  2. Otherwise **generate a flat pit/grid platform** (ROAD surface, simple barrier) adjacent to the start block,
-     joined to it by a short ramp/apron. It counts as generated geometry and appears in the report.
-- Grid spacing is 8 m longitudinal and 4 m lateral in a staggered 2-wide grid. Pit boxes are spaced 6 m apart.
-- `AC_PIT_*` and `AC_START_*` all face the race direction.
+- **Default: one starting spot (decision 2026-10-01, in-game round 4).** `AC_START_0`, `AC_PIT_0` and `AC_HOTLAP_START_0` all
+  sit on the start block's own spawn point, just behind the line, snapped to the collision surface. Every AC session
+  (race, practice/pit, hotlap, time attack) therefore starts at the start line, as in Trackmania.
+- `--pitboxes N` (N > 1) adds a staggered grid behind the spawn: slots 8 m apart, ±3 m lateral, with pit boxes on the same spots.
+  Slots are validated against the collision. If there's no surface, a flat ROAD platform is generated behind the start
+  block (PIT_PLATFORM_GENERATED).
+- All dummies face the race direction.
 
 ### 7.4 KN5 model
 - Written by our own writer (§9) as KN5 **version 6**. There are two KN5s per track (visual and collision), tied together by `models.ini`.

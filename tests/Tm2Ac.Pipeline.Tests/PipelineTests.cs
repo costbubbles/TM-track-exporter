@@ -470,5 +470,10 @@ public sealed class SpawnHeightTests : IDisposable
         var start = visual.Root.Children.OfType<Kn5.Kn5DummyNode>().Single(d => d.Name == "AC_START_0").Transform.Translation;
         Assert.Equal(0.39f, start.Y, 2);
         Assert.False(Directory.Exists(Path.Combine(result.Directory, "ai")));
+
+        // Default: one pit box, and race, pit and hotlap all start at the same spot on the start/finish block.
+        var spawns = visual.Root.Children.OfType<Kn5.Kn5DummyNode>().Where(d => d.Name.StartsWith("AC_START_", StringComparison.Ordinal) || d.Name.StartsWith("AC_PIT_", StringComparison.Ordinal) || d.Name == "AC_HOTLAP_START_0").ToList();
+        Assert.Equal(["AC_HOTLAP_START_0", "AC_PIT_0", "AC_START_0"], spawns.Select(d => d.Name).Order());
+        Assert.All(spawns, d => Assert.True(Vector3.Distance(d.Transform.Translation, start) < 0.01f, d.Name));
     }
 }

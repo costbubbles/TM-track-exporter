@@ -109,7 +109,7 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
         }
 
         AddGridAndPits(track, spawnTm, forwardTm, options.Pitboxes);
-        AddHotlapStart(track, spawnTm, forwardTm, ghost);
+        AddHotlapStart(track, spawnTm, forwardTm);
     }
 
     /// <summary>
@@ -280,26 +280,11 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
     }
 
     /// <summary>
-    /// Hotlap start: on a circuit, the ghost's position ~4 s before it first completes the lap (on the run-up to the line);
-    /// otherwise the spawn.
+    /// Hotlap start = the start block's spawn (just behind the line), so every session starts at the start line. A ghost
+    /// position on the run-up looked clever but put the car on random kerbs near the map edge (in-game round 4).
     /// </summary>
-    private void AddHotlapStart(AcTrackModel track, Vector3 spawnTm, Vector3 forwardTm, TmGhost? ghost)
-    {
-        var position = OnGround(spawnTm);
-        var forward = forwardTm;
-        if (Layout == RaceLayout.Circuit && ghost is not null)
-        {
-            var lapTime = ghost.CheckpointTimesMs.Count > OrderedCheckpoints.Count ? ghost.CheckpointTimesMs[OrderedCheckpoints.Count] : ghost.RaceTimeMs;
-            var sample = ghost.At(Math.Max(0, lapTime - 4000));
-            if (sample.WheelsOnGround > 0 && sample.Velocity.LengthSquared() > 1)
-            {
-                position = OnGround(sample.Position);
-                forward = sample.Velocity;
-            }
-        }
-
-        track.Dummies.Add(new AcDummy(AcNames.HotlapStart, scene.ToAc(position), Vector3.Normalize(new Vector3(forward.X, 0, forward.Z))));
-    }
+    private void AddHotlapStart(AcTrackModel track, Vector3 spawnTm, Vector3 forwardTm) =>
+        track.Dummies.Add(new AcDummy(AcNames.HotlapStart, scene.ToAc(OnGround(spawnTm)), Vector3.Normalize(new Vector3(forwardTm.X, 0, forwardTm.Z))));
 
     /// <summary>Drivable surface height under a car-centre position (TM space), searching 4 m down; null if none.</summary>
     private float? GroundHeight(Vector3 carCentreTm) => scene.SurfaceHeightBelow(carCentreTm + new Vector3(0, 0.5f, 0), 4f);

@@ -34,7 +34,7 @@ The track then shows up in Content Manager and AC as e.g. `tmnf_18451_always_be_
 | `--zip <file.zip>` | Also produce a zip you can drag into Content Manager |
 | `--replay <id or file>` | Use a specific replay for the AI line and checkpoint order (default: the TMX world record) |
 | `--force` | Convert even if the track is rated Red |
-| `--pitboxes <n>` | Number of grid slots and pit boxes (default 10) |
+| `--pitboxes <n>` | Grid slots and pit boxes. Default 1 (everyone starts at the start line); more adds a grid behind it |
 
 ## What gets converted
 
@@ -77,3 +77,10 @@ Needs the .NET 10 SDK. Developer documentation is in [CLAUDE.md](CLAUDE.md), [SP
 
 GPL-3.0-or-later (see [LICENSE](LICENSE)). It uses [GBX.NET](https://github.com/BigBang1112/gbx-net) (MIT) and
 GBX.NET.LZO (GPL-3.0).
+
+## Known limitations
+
+- **No AI.** Few Trackmania maps can be driven conventionally in AC, so no AI line is generated.
+- **Hitting thin walls can occasionally drop the car through the map.** This is a limitation of AC's collision with thin geometry
+  that many popular track mods share.
+- Boosters don't boost, and special surfaces are approximated (see the compatibility rating).

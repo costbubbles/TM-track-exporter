@@ -74,6 +74,8 @@ _Last updated: 2026-09-30_
 | 2026-10-01 | **No AI line.** The user decided TM maps rarely drive conventionally in AC; the replay is still used for timing, layout and rating |
 | 2026-10-01 | Collision is read from every tree in a solid, not just the root |
 | 2026-10-01 | Collision faces with normal.y < -0.2 are dropped (they pushed cars through the road) |
+| 2026-10-01 | One starting spot by default: AC_START_0 = AC_PIT_0 = AC_HOTLAP_START_0 = start block spawn. `--pitboxes N` adds a grid |
+| 2026-10-01 | Known limitation accepted: occasional fall-through when hitting thin walls (common in AC track mods) |
 
 ## Open questions
 
@@ -108,6 +110,15 @@ R1/R3 reinstalled for round 3.
 - **Decision:** no AI line (TM maps rarely drive conventionally in AC). Timing stays.
 
 R1/R3 reinstalled for round 4.
+
+**Round 4 feedback (2026-10-01):**
+- Performance is fine.
+- Spawned tilted at the map edge (Hotlap) while the pits were on the start/finish road → the hotlap start used a replay position.
+  **Fixed**: one starting spot by default (race, pit and hotlap all on the start block's spawn).
+- Hitting walls can still knock the car under the map now and then. **Known limitation**: AC collision with thin walls; popular track
+  mods show the same. Not pursued for now.
+
+R1/R3 reinstalled for round 5.
 
 Installed in AC on 2026-10-01: **`tmnf_18451_always_be_mine`** (R1, A to B) and **`tmnf_1531338_rockridge`** (R3, 2-lap circuit).
 If something is badly wrong, roll back with git: each phase is its own commit.
@@ -201,3 +212,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - **2026-10-01:** In-game check round 1 found swapped road/kerb textures, caused by the TM V axis. Fixed the UV flip, mapped Rubber to KERB, and reinstalled R1/R3. Also landed the Phase 8 groundwork (AppSettings, InstalledTracks, converter progress/cancellation). 132 tests pass.
 - **2026-10-01:** In-game round 2 fixes: grass fringe dropped and dummies snapped to the surface. R1/R3 reinstalled. 134 tests pass.
 - **2026-10-01:** In-game round 3 fixes: child-tree collision (80 → 0 variants missing), downward faces dropped, AI line removed, re-converting cleans the old folder. R1/R3 reinstalled. 135 tests pass.
+- **2026-10-01:** Round 4 fixes: single start spot (hotlap at the start line, 1 pit box by default). Wall fall-through accepted as a known limitation. 135 tests pass.

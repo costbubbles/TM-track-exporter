@@ -5,8 +5,11 @@ public sealed record ConversionOptions
     /// <summary>Uniform world scale (SPEC §6), 0.25–4.</summary>
     public float Scale { get; init; } = 1f;
 
-    /// <summary>Number of grid slots and pit boxes (SPEC §7.3).</summary>
-    public int Pitboxes { get; init; } = 10;
+    /// <summary>
+    /// Grid slots and pit boxes (SPEC §7.3). The default of 1 puts every session's spawn (race, practice/pit, hotlap) on the
+    /// start block's own spawn point; more adds a staggered grid behind it for multi-car races.
+    /// </summary>
+    public int Pitboxes { get; init; } = 1;
 
     /// <summary>Fill unoccupied ground cells with the game's default grass tile.</summary>
     public bool DefaultGrass { get; init; } = true;

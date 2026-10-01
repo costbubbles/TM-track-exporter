@@ -17,7 +17,7 @@ internal static class ConvertCommand
         var acPath = new Option<DirectoryInfo?>("--ac-path") { Description = "Assetto Corsa install folder (auto-detected when omitted)." };
         var scale = new Option<float>("--scale") { Description = "Uniform world scale, 0.25–4 (e.g. 1.5 for road cars, 2 for GT).", DefaultValueFactory = _ => 1f };
         var replay = new Option<string?>("--replay") { Description = "TMX replay id or a local .Replay.Gbx/.Ghost.Gbx for the AI line and checkpoint order (default: TMX world record)." };
-        var pitboxes = new Option<int>("--pitboxes") { Description = "Grid slots and pit boxes.", DefaultValueFactory = _ => 10 };
+        var pitboxes = new Option<int>("--pitboxes") { Description = "Grid slots and pit boxes. Default 1: everyone starts at the start line; more adds a grid behind it.", DefaultValueFactory = _ => 1 };
         var noGrass = new Option<bool>("--no-grass") { Description = "Don't fill empty ground cells with the default Stadium grass." };
         var force = new Option<bool>("--force") { Description = "Convert even if the map is rated Red (loops, wall riding, huge jumps)." };
         var zip = new Option<FileInfo?>("--zip") { Description = "Also write a zip that Content Manager can install by drag and drop." };
