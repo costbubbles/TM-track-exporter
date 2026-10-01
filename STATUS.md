@@ -93,3 +93,6 @@ _Last updated: 2026-09-30_
   - Ran spikes S1–S7 against the real AC install (129 tracks, CSP 0.3.0-preview445), TMX, and a fresh TMNF install.
   - Saved the probe programs to `tools/spikes/`.
   - Updated SPEC with the verified facts.
+- **2026-10-01:** Created the public repo https://github.com/costbubbles/TM-track-exporter and pushed `main`. CI first failed
+  because `.gitignore`'s `*.Gbx` and `*.kn5` patterns also hid the `src/Tm2Ac.Gbx/` and `src/Tm2Ac.Kn5/` folders (Windows git is
+  case-insensitive). Fixed with `!*/`, verified from a fresh clone, and CI is now green.
