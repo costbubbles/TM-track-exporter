@@ -37,5 +37,17 @@ internal static class CliCommon
             : t.ToString(@"m\:ss\.fff", CultureInfo.InvariantCulture);
     }
 
+    /// <summary>TMNF install folder, printing an error when it can't be found.</summary>
+    public static string? FindTmnf()
+    {
+        var path = OperatingSystem.IsWindows() ? TrackmaniaInstalls.FindTmnf() : null;
+        if (path is null)
+        {
+            Console.Error.WriteLine("TrackMania Nations Forever not found. Install it (free on Steam, app 11020) and run tm2ac doctor.");
+        }
+
+        return path;
+    }
+
     public static string Truncate(string text, int length) => text.Length <= length ? text : text[..(length - 1)] + "…";
 }

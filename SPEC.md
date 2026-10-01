@@ -41,8 +41,7 @@ tm2ac search  <game> [query] [--author X] [--tag T]... [--multilap] [--order Mos
 tm2ac info    <game> <tmxId | path.Gbx>            # metadata + block/waypoint summary (downloads map); compatibility added in Phase 7
 tm2ac analyze <game> <tmxId | path.Gbx>            # full compatibility report, no output written
 tm2ac convert <game> <tmxId | path.Gbx> [options]
-tm2ac assets  extract <game> [--tm-path DIR]       # build/refresh the mesh cache
-tm2ac assets  status
+tm2ac assets  check [tmxIds...]                     # extract all blocks, report gaps (and for given maps)
 tm2ac doctor                                       # check AC/CSP/TM paths and cache state
 ```
 `<game>` is one of `tmnf`, `tmuf` or `tm2020`.
@@ -74,8 +73,8 @@ tm2ac doctor                                       # check AC/CSP/TM paths and c
 
 ### 2.3 Settings & storage
 - Settings live in `%APPDATA%\Tm2Ac\settings.json`.
-- The cache lives in `%LOCALAPPDATA%\Tm2Ac\cache\`. It holds `tmx/` (API responses and map/replay files) and
-  `assets/<game>/<tmBuild>/` (extracted meshes and textures).
+- The cache lives in `%LOCALAPPDATA%\Tm2Ac\cache\`. It holds `tmx/` (API responses and map/replay/image files).
+  Game assets are read from the TM install on demand (see §4.4).
 - Path auto-detection:
   - Read the Steam install path from `HKLM\SOFTWARE\WOW6432Node\Valve\Steam` → `InstallPath`, then parse
     `steamapps\libraryfolders.vdf` for each library.
@@ -162,8 +161,8 @@ apply.
   3. Embedded items only, with procedural fallback for Nadeo blocks.
 
   This is decided by spike S8.
-- The extracted mesh cache stores meshes in an internal binary format holding positions, normals, UVs, material refs and
-  collision meshes with surface IDs. Cache entries are keyed by game build and asset path.
+- **No persistent mesh cache.** Extracting all 308 Stadium blocks takes ~6 s, so blocks are extracted on demand per conversion
+  and memoised in memory (decision 2026-10-01).
 
 ---
 

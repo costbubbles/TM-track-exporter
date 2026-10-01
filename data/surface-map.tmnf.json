@@ -1,0 +1,33 @@
+{
+  "description": "TMNF physics surfaces (CPlugMaterial.SurfaceId seen in Stadium.pak collision meshes) to AC surfaces. Friction values are starting points to tune in playtesting (SPEC §7.7).",
+  "wallSlopeDegrees": 55,
+  "acSurfaces": {
+    "ROAD": { "friction": 0.99 },
+    "DIRT": { "friction": 0.85, "dirtAdditive": 0.3, "sinHeight": 0.01, "sinLength": 1.5, "wav": "", "isValidTrack": true },
+    "GRASS": { "friction": 0.6, "dirtAdditive": 1, "sinHeight": 0.03, "sinLength": 0.5, "wav": "grass.wav", "isValidTrack": false, "vibrationGain": 0.2, "vibrationLength": 0.6 },
+    "ICE": { "friction": 0.35, "isValidTrack": true, "extSurfaceType": "ICE" }
+  },
+  "tmSurfaces": {
+    "Asphalt": { "ac": "ROAD" },
+    "Concrete": { "ac": "ROAD" },
+    "Pavement": { "ac": "ROAD" },
+    "Metal": { "ac": "ROAD" },
+    "ResonantMetal": { "ac": "ROAD" },
+    "Rubber": { "ac": "ROAD" },
+    "Wood": { "ac": "ROAD" },
+    "Dirt": { "ac": "DIRT" },
+    "DirtRoad": { "ac": "DIRT" },
+    "Grass": { "ac": "GRASS" },
+    "Sand": { "ac": "GRASS" },
+    "Ice": { "ac": "ICE", "issue": "SPECIAL_SURFACE_APPROX" },
+    "SlidingRubber": { "ac": "ICE", "issue": "SPECIAL_SURFACE_APPROX" },
+    "Turbo_Deprecated": { "ac": "ROAD", "issue": "BOOSTER_UNSUPPORTED" },
+    "TurboRoulette_Deprecated": { "ac": "ROAD", "issue": "BOOSTER_UNSUPPORTED" },
+    "Turbo": { "ac": "ROAD", "issue": "BOOSTER_UNSUPPORTED" },
+    "Turbo2": { "ac": "ROAD", "issue": "BOOSTER_UNSUPPORTED" },
+    "FreeWheeling_Deprecated": { "ac": "ROAD", "issue": "SPECIAL_SURFACE_APPROX" },
+    "Water": { "ac": null },
+    "NotCollidable": { "ac": null }
+  },
+  "unknownSurface": "ROAD"
+}

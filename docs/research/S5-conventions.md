@@ -45,6 +45,26 @@ In the WR ghost of #924307, on-ground samples above 20 m/s with |steer| > 0.3 we
 If TM's negative steer means left (the usual TM input convention), then in TM world "left of +Z is +X", the same as AC.
 **Prediction: the TM→AC mapping is the identity (no mirroring).** This still needs confirming on a real map in Phase 4.
 
+## Block placement verified against ghosts (Phase 3)
+`BlockPlacement` (src/Tm2Ac.Pipeline) places the start block's `SpawnLocGround/Air` (from its block info) at the block
+coord. It matched the WR ghost's first sample with **0.00 m error and the same heading on all 7 reference maps**:
+- Directions South, East and West.
+- Ground and air start blocks.
+- Both `StartLine` and `StartFinishLine` blocks.
+
+This confirms:
+- Block-local solids span [0, 32·units] and rotate about the footprint centre.
+- **Direction d = rotation by −90°·d about Y**: North keeps +Z, East → −X, South → −Z, West → +X.
+- World = (X·32, Y·8, Z·32) + local.
+- North→East is a right turn in AC's frame. This is independent evidence that TM and AC share handedness (no mirroring).
+
+Other placement facts:
+- Block info **file names can differ from block ids** (`StadiumRoadMainStartLine` is in `StadiumRoadMainStart.TMEDClassic.Gbx`).
+  Index by `Ident.Id`.
+- The placed block's `Variant` (flags & 0x3F) indexes `GroundMobils`/`AirMobils` according to `IsGround`.
+- Terrain blocks (Pool, Water, Dirt, Grass) sit at coord y=0 with their surface modelled at local y≈9. Ground road blocks
+  sit at y=1 with the road at local y≈1, so both end up at world y≈9. **The default grass field is not stored in the map.**
+
 ## Open: handedness
 Is TM's world left-handed relative to AC's? Mapping (x, y, z) → (x, y, z) directly may mirror the track. Plan:
 1. In Phase 1, build the synthetic L-shaped track. Confirm in game which way it turns relative to `AC_START_0` facing.

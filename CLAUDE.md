@@ -40,16 +40,17 @@ src/
   Tm2Ac.Core/        IR (intermediate track representation), pipeline orchestration, settings
   Tm2Ac.Tmx/         TMX API clients (TMNF-X/TMUF-X, TMX 2020), download, metadata
   Tm2Ac.Gbx/         Map + ghost parsing via GBX.NET -> IR
-  Tm2Ac.Assets/      TM install discovery, block/item mesh+texture extraction, mesh cache
+  Tm2Ac.Assets/      TM pak filesystem (hashed names, recursive refs), block/material/collision extraction (on demand)
   Tm2Ac.Geometry/    Placement transforms, scaling, mesh merge/split, physics mesh build, surface mapping
   Tm2Ac.Kn5/         KN5 writer (+ minimal reader for round-trip tests)
   Tm2Ac.AcTrack/     AC track folder writer: inis, dummies, fast_lane.ai, map/ui, ext_config
+  Tm2Ac.Pipeline/    TM→AC conversion: block placement, surface map, material translation, scene builder, converter
   Tm2Ac.Cli/         `tm2ac` command-line entry point
   Tm2Ac.App/         WPF desktop app
 tests/
   Tm2Ac.<Project>.Tests/
 data/
-  surface-map.tmnf.json, surface-map.tm2020.json, block-flags.*.json   (data-driven mappings)
+  surface-map.tmnf.json, block-flags.tmnf.json   (data-driven mappings, embedded as resources)
 docs/research/       Findings from research spikes (one md per spike)
 tools/spikes/        Phase 0 probe programs (not in Tm2Ac.slnx)
 ```

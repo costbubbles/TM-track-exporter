@@ -70,16 +70,24 @@ covered by Phase 1's L-shaped test by design.
 
 ---
 
-## Phase 3: TMNF asset extraction & mesh cache
+## Phase 3: TMNF asset extraction
 
-- [ ] TMNF install discovery
-- [ ] Pak reading (from S2), plus block info → variants (ground/air) → mesh + material + collision extraction
-- [ ] Internal mesh cache format, keyed by game build + asset path, with `tm2ac assets extract|status`
-- [ ] Material translation: TM material → KN5 material (shader choice, texture slots, alpha test)
-- [ ] Collision: `CPlugSurface` mesh + physics material ID → surface key, via `data/surface-map.tmnf.json`
-- [ ] Placeholder generator for missing assets (bounding box + `MISSING_ASSET` issue)
+- [x] TMNF install discovery (Steam + standalone)
+- [x] `TmnfPakFileSystem`: all decryptable paks + GameData, hashed-name resolution, and **recursive ref-table wiring** so lazy
+      GBX.NET properties load across files. Unparseable files are recorded rather than thrown
+- [x] `TmnfBlockExtractor`/`TmnfBlockLibrary`: block info (indexed by `Ident.Id`) → variants (ground/air × index) → LOD-0
+      visual parts per material + collision per TM surface (root tree transform applied), units and spawn locations.
+      All 308 Stadium blocks extract in ~6 s, with 9 lacking visuals (7 GBX.NET parse gaps, plus terrain/pylon specials)
+- [x] ~~Mesh cache~~ **Dropped:** extraction is fast enough to do on demand (decision 2026-10-01)
+- [x] Material translation (`MaterialTranslator`): diffuse (or best stand-in slot) DDS from GameData, ksPerPixel/AT,
+      glow and fake-shadow materials dropped, water and fallback textures generated
+- [x] Collision surfaces: `data/surface-map.tmnf.json` + `SurfaceMap` (TM surface → AC key and issue code; slopes over 55° → WALL)
+- [x] `tm2ac assets check [tmx-ids]`, plus a new `Tm2Ac.Pipeline` project for the TM→AC conversion layer
+- [x] Placement verified: block spawn locations match the WR ghosts' first samples with 0.00 m error on all 7 reference maps
+- [ ] Placeholder geometry for missing blocks: moved to Phase 4 (fallback block table + `MISSING_ASSET` issue)
 
-**Exit:** every block used by the reference maps is in the cache, or knowingly reported as missing.
+**Exit:** every block used by the reference maps is in the cache, or knowingly reported as missing. ✅ Met: the only gaps are
+StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac assets check <ids>`).
 
 ---
 

@@ -14,6 +14,7 @@
     <ProjectReference Include="..\Tm2Ac.Geometry\Tm2Ac.Geometry.csproj" />
     <ProjectReference Include="..\Tm2Ac.Kn5\Tm2Ac.Kn5.csproj" />
     <ProjectReference Include="..\Tm2Ac.AcTrack\Tm2Ac.AcTrack.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Pipeline\Tm2Ac.Pipeline.csproj" />
   </ItemGroup>
 
   <ItemGroup>

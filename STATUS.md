@@ -6,9 +6,9 @@ _Last updated: 2026-09-30_
 
 | | |
 |---|---|
-| **Phase** | 2 is ✅ complete. Next is **Phase 3: TMNF asset extraction & mesh cache** |
+| **Phase** | 3 is ✅ complete. Next is **Phase 4: geometry assembly, first real TMNF track in AC** |
 | **Release** | none |
-| **Next up** | Pak reader in `Tm2Ac.Assets` (nested ref resolution), block → mesh/material/collision extraction, internal mesh cache, `tm2ac assets extract/status` |
+| **Next up** | Scene builder (blocks → visual/collision chunks, default grass, edge walls, fallbacks), `tm2ac convert`, install R1 |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -19,8 +19,8 @@ _Last updated: 2026-09-30_
 | 0 Foundation & spikes | ✅ done (S5 handedness is deferred to Phase 1 by design) |
 | 1 Hello AC (synthetic track) | ✅ done (user verified all in-game checks 2026-10-01) |
 | 2 TMX client + TMNF parsing | ✅ done (2026-10-01) |
-| 3 TMNF asset extraction | ⬜ next |
-| 4 Geometry → first TMNF track in AC | ⬜ |
+| 3 TMNF asset extraction | ✅ done (2026-10-01) |
+| 4 Geometry → first TMNF track in AC | 🟨 in progress |
 | 5 Route, timing, spawns, pits | ⬜ |
 | 6 AI line, UI assets, CSP config | ⬜ |
 | 7 Compatibility → v0.1 (CLI) | ⬜ |
@@ -61,6 +61,10 @@ _Last updated: 2026-09-30_
 | 2026-09-30 | GitHub repo: `costbubbles/TM-track-exporter` (public). The product and code name stays "Tm2Ac" for now, and the final product name is still open |
 | 2026-10-01 | TMX search: `primarytype` is single-valued, so the default is Race (0), and circuits are found via tag Multilap |
 | 2026-10-01 | Waypoint detection uses a table generated from Stadium.pak `WayPointType`, never name matching |
+| 2026-10-01 | No persistent mesh cache: all 308 TMNF blocks extract in ~6 s, so extraction is on demand |
+| 2026-10-01 | New `Tm2Ac.Pipeline` project holds the TM→AC conversion layer (it needs Assets + Gbx + AcTrack together) |
+| 2026-10-01 | Collision triangles steeper than 55° (or facing down) become WALL whatever their TM surface |
+| 2026-10-01 | User away: working autonomously, manual in-game checks are queued in "Pending manual checks", and each phase is committed separately for easy rollback |
 
 ## Open questions
 
@@ -71,6 +75,10 @@ _Last updated: 2026-09-30_
 
 ## Reference maps
 See [tests/reference-maps.md](tests/reference-maps.md): R1–R7, from the simplest A-to-B (18451) to the expected-Red loop map (924307).
+
+## Pending manual checks (queued while the user was away)
+
+_None yet: added as phases need in-game verification._
 
 ## Phase 1 in-game checklist (`Tm2Ac Test Circuit (L)`): ✅ all passed 2026-10-01
 
@@ -123,3 +131,8 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - Wrote the TMX client (cache, retries, concurrency limit) and the TMNF map reader with the pak-generated waypoint table.
   - Added `tm2ac search/info/doctor` and picked reference maps R1–R7. `info` works on all 7.
   - 79 tests pass (5 live network tests).
+- **2026-10-01:** Phase 3.
+  - Pak filesystem with recursive refs, a block extractor indexed by Ident, the surface map and the material translator.
+  - `tm2ac assets check`.
+  - Block placement verified against 7 WR ghosts with 0.00 m error.
+  - 112 tests pass (8 asset/network).

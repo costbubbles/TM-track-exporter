@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Tm2Ac.Core\Tm2Ac.Core.csproj" />
     <ProjectReference Include="..\Tm2Ac.Gbx\Tm2Ac.Gbx.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Geometry\Tm2Ac.Geometry.csproj" />
   </ItemGroup>
 
   <ItemGroup>
