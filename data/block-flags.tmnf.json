@@ -1,0 +1,24 @@
+{
+  "environment": "Stadium",
+  "source": "WayPointType of every CGameCtnBlockInfo in TMNF Packs/Stadium.pak (Steam build, extracted 2026-10-01 with tools/spikes/TmnfPakProbe blocks). Blocks not listed have no special flags.",
+  "blocks": {
+    "StadiumCheckpointRingHRoad": { "waypoint": "Checkpoint" },
+    "StadiumCheckpointRingV": { "waypoint": "Checkpoint" },
+    "StadiumGrassCheckpoint": { "waypoint": "Checkpoint" },
+    "StadiumPlatformCheckpoint": { "waypoint": "Checkpoint" },
+    "StadiumPlatformCheckpointDown": { "waypoint": "Checkpoint" },
+    "StadiumPlatformCheckpointLeft": { "waypoint": "Checkpoint" },
+    "StadiumPlatformCheckpointRight": { "waypoint": "Checkpoint" },
+    "StadiumPlatformCheckpointUp": { "waypoint": "Checkpoint" },
+    "StadiumRoadDirtCheckpoint": { "waypoint": "Checkpoint" },
+    "StadiumRoadDirtHighCheckpoint": { "waypoint": "Checkpoint" },
+    "StadiumRoadMainCheckpoint": { "waypoint": "Checkpoint" },
+    "StadiumRoadMainCheckpointDown": { "waypoint": "Checkpoint" },
+    "StadiumRoadMainCheckpointLeft": { "waypoint": "Checkpoint" },
+    "StadiumRoadMainCheckpointRight": { "waypoint": "Checkpoint" },
+    "StadiumRoadMainCheckpointUp": { "waypoint": "Checkpoint" },
+    "StadiumRoadMainFinishLine": { "waypoint": "Finish" },
+    "StadiumRoadMainStartFinishLine": { "waypoint": "StartFinish" },
+    "StadiumRoadMainStartLine": { "waypoint": "Start" }
+  }
+}

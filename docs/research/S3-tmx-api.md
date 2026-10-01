@@ -64,6 +64,14 @@ inreplays, inhasrecord, order1 (Track Search Orders), count, after/before (curso
 
   - Useful heuristics: RPG/Trial/LOL/PressForward/Altered Nadeo → likely Red/Yellow. Tech/Nascar/Multilap → likely Green.
 
+## Found while implementing the client (Phase 2)
+- **`primarytype` is single-valued.** Repeating it (`primarytype=0&primarytype=5`) returns HTTP 400 "Invalid value
+  for 'primarytype'". `tag` does accept repeats.
+- **Multilap maps are tagged `Multilap` (tag 4) but usually have PrimaryType Race (0).** `primarytype=5` (Laps)
+  returned nothing in the TMNF-X results checked. Use the tag to find circuits.
+- `tmuf.exchange` serves the identical API (search, `trackgbx`, enums) and shares track ids with TMNF-X for Stadium.
+- `id=<n>` on `/api/tracks` is the simplest single-track lookup.
+
 ## Implications for SPEC
 1. Fix the SPEC §3 endpoint table: `trackshow/{id}/image/{n}` is correct for TMNF, and TMX 2020 uses `mapthumb`/`mapimage`.
 2. **TM2020 AI line:** TMX rarely has replays. Options, decided in Phase 9:

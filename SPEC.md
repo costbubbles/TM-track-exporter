@@ -37,8 +37,8 @@ confirm (see PLAN.md). When a spike disproves something here, update this file.
 
 ### 2.1 CLI (`tm2ac`)
 ```
-tm2ac search  <game> [query] [--author X] [--tag T] [--limit N]
-tm2ac info    <game> <tmxId>                       # metadata + compatibility (downloads map)
+tm2ac search  <game> [query] [--author X] [--tag T]... [--multilap] [--order MostAwards|Newest|...] [--limit N]
+tm2ac info    <game> <tmxId | path.Gbx>            # metadata + block/waypoint summary (downloads map); compatibility added in Phase 7
 tm2ac analyze <game> <tmxId | path.Gbx>            # full compatibility report, no output written
 tm2ac convert <game> <tmxId | path.Gbx> [options]
 tm2ac assets  extract <game> [--tm-path DIR]       # build/refresh the mesh cache
@@ -105,7 +105,8 @@ Rules:
 - At most 2 concurrent requests per host, with exponential backoff on 429/5xx.
 - Cache: map and replay files are immutable per ID, so they are cached forever. Search responses are cached for 10 minutes.
 - TMNF-X search results include `WRReplay.ReplayId`, so the default AI-line ghost needs no extra call.
-- Default browser filter: `primarytype` Race (0) or Laps (5).
+- Default browser filter: `primarytype=0` (Race). The parameter is single-valued. Circuits are found by tag `Multilap` (4),
+  because TMNF-X multilap maps are listed as Race.
 - Metadata we keep: name, author(s), upload/update dates, tags, environment, mood, author time, awards,
   difficulty, TMX URL, description and image URLs.
 

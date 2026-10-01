@@ -4,8 +4,4 @@
     <ProjectReference Include="..\Tm2Ac.Core\Tm2Ac.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Http" />
-  </ItemGroup>
-
 </Project>

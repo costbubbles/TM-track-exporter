@@ -48,7 +48,7 @@ covered by Phase 1's L-shaped test by design.
 - [x] Synthetic track: the oval and L-shape are **merged into one asymmetric L-shaped circuit**, `tm2ac_test_lcircuit` (1,010 m).
       It has ROAD/GRASS/WALL collision, a blue LEFT and red RIGHT wall, a "TM2AC ▲" start decal, 8 grid/pit slots, 3 timing gates and a hotlap start
 - [x] Installed into AC (`content/tracks/tm2ac_test_lcircuit`)
-- [ ] **Manual check by the user** (checklist in STATUS.md): shows in CM, loads with CSP, spawns face forward, walls on the
+- [x] **Manual check by the user** (checklist in STATUS.md), all passed 2026-10-01: shows in CM, loads with CSP, spawns face forward, walls on the
       correct sides, text and arrows readable, corner sequence R-R-R-L-R-R, laps and sectors time, pits work
 
 **Exit:** a drivable synthetic track. S5 conventions are recorded in SPEC §6/§7.4.
@@ -57,13 +57,16 @@ covered by Phase 1's L-shaped test by design.
 
 ## Phase 2: TMX client + TMNF map parsing
 
-- [ ] `Tm2Ac.Tmx`: search, map download, replay list/download and image download, with caching, backoff and User-Agent
-- [ ] `Tm2Ac.Gbx`: TMNF map → block list, metadata, mood, laps and waypoint blocks (start, finish, CP, multilap)
-- [ ] TM formatting-code stripper and track-ID slugger, both with tests
-- [ ] CLI: `search`, `info`, plus the `doctor` skeleton (path detection for AC, CSP and TMNF)
-- [ ] `tests/reference-maps.md` with 5–6 reference TMNF-X IDs (SPEC §11)
+- [x] `Tm2Ac.Tmx`: search, track lookup, map/replay/image download, tags. Includes a disk cache (files forever, API 10 min, meta 1 day),
+      at most 2 requests in flight, retry with backoff on 429/5xx/network errors only, and the required User-Agent
+- [x] `Tm2Ac.Gbx`: TMNF map → blocks (coord, direction, ground/pillar/clip, variant), metadata, mood, laps/multilap and
+      waypoints. The waypoint table `data/block-flags.tmnf.json` is **generated from Stadium.pak `WayPointType`** (18 blocks) and embedded
+- [x] TM formatting-code stripper and track-ID slugger, both with tests
+- [x] CLI: `search` (tags, multilap, order), `info` (TMX id or local file), and `doctor` (AC, CSP, TMNF + Stadium.pak/textures, TM2020 + Openplanet, cache)
+- [x] `tests/reference-maps.md` with 7 reference maps, R1–R7
+- [x] Tests: 79 total. 5 are network tests (live TMX + parsing R1/R3/R7) and run locally. CI runs the 74 offline tests
 
-**Exit:** `tm2ac info tmnf <id>` prints metadata and the block summary for every reference map.
+**Exit:** `tm2ac info tmnf <id>` prints metadata and the block summary for every reference map. ✅ Met (2026-10-01).
 
 ---
 

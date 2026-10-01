@@ -17,6 +17,32 @@ PakFile? Resolve(string fullPath)
     return null;
 }
 
+if (refPath == "blocks")
+{
+    // Mode "blocks": list every block info in the pak with its WayPointType (used to build data/block-flags.tmnf.json).
+    var lines = new List<string>();
+    foreach (var file in pak.Files.Values.Where(f => f.FolderPath.Contains("ConstructionBlockInfo", StringComparison.Ordinal)))
+    {
+        try
+        {
+            var node = pak.OpenGbxFile(file, new GbxReadSettings(), false, null!).Node;
+            if (node is GBX.NET.Engines.Game.CGameCtnBlockInfo info)
+            {
+                lines.Add($"{info.Ident.Id}\t{info.GetType().Name}\t{info.WayPointType}");
+            }
+        }
+        catch (Exception e)
+        {
+            lines.Add($"{file.Name}\tERROR\t{e.GetType().Name}");
+        }
+    }
+
+    lines.Sort(StringComparer.Ordinal);
+    File.WriteAllLines(outDir, lines);
+    Console.WriteLine($"{lines.Count} block infos; waypoint counts: " + string.Join(", ", lines.Select(l => l.Split('\t')[2]).GroupBy(x => x).Select(g => $"{g.Key}={g.Count()}")));
+    return;
+}
+
 var solid = (CPlugSolid)pak.OpenGbxFile(Resolve(refPath)!, new GbxReadSettings(), true, null!).Node!;
 solid.ExportToObj(Path.Combine(outDir, "block.obj"), Path.Combine(outDir, "block.mtl"), lod: 0);
 Console.WriteLine($"OBJ written: {new FileInfo(Path.Combine(outDir, "block.obj")).Length} bytes");

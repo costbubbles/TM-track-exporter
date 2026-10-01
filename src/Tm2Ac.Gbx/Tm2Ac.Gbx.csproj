@@ -10,4 +10,8 @@
     <PackageReference Include="GBX.NET.ZLib" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\data\block-flags.tmnf.json" LogicalName="block-flags.tmnf.json" />
+  </ItemGroup>
+
 </Project>

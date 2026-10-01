@@ -1,58 +1,20 @@
 using System.CommandLine;
-using System.Text.Json.Nodes;
-using Tm2Ac.AcTrack;
-using Tm2Ac.AcTrack.Synthetic;
-using Tm2Ac.Core;
+using Tm2Ac.Cli;
+
+Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 var root = new RootCommand("Tm2Ac: convert Trackmania Exchange tracks into Assetto Corsa tracks.");
+root.Subcommands.Add(SearchCommand.Create());
+root.Subcommands.Add(InfoCommand.Create());
+root.Subcommands.Add(DoctorCommand.Create());
 root.Subcommands.Add(DevCommands.Create());
-return root.Parse(args).Invoke();
 
-internal static class DevCommands
+try
 {
-    public static Command Create()
-    {
-        var dev = new Command("dev", "Developer tools.");
-
-        var outOption = new Option<DirectoryInfo?>("--out") { Description = "Write the track folder under this directory instead of AC's content/tracks." };
-        var acPathOption = new Option<DirectoryInfo?>("--ac-path") { Description = "Assetto Corsa install folder (auto-detected from Steam when omitted)." };
-        var testTrack = new Command("test-track", "Generate the Phase 1 synthetic L-shaped test circuit and install it into Assetto Corsa.");
-        testTrack.Options.Add(outOption);
-        testTrack.Options.Add(acPathOption);
-        testTrack.SetAction(parseResult => WriteTestTrack(parseResult.GetValue(outOption), parseResult.GetValue(acPathOption)));
-
-        dev.Subcommands.Add(testTrack);
-        return dev;
-    }
-
-    private static int WriteTestTrack(DirectoryInfo? outDirectory, DirectoryInfo? acPath)
-    {
-        string tracksDirectory;
-        if (outDirectory is not null)
-        {
-            tracksDirectory = outDirectory.FullName;
-        }
-        else
-        {
-            var acRoot = acPath?.FullName ?? (OperatingSystem.IsWindows() ? AssettoCorsa.FindInstall() : null);
-            if (acRoot is null)
-            {
-                Console.Error.WriteLine("Assetto Corsa not found. Pass --ac-path <AC folder> or --out <folder>.");
-                return 1;
-            }
-
-            var csp = AssettoCorsa.FindCspVersion(acRoot);
-            Console.WriteLine($"Assetto Corsa: {acRoot} (CSP {csp ?? "not installed"})");
-            tracksDirectory = AssettoCorsa.TracksDirectory(acRoot);
-        }
-
-        var track = TestCircuit.Build();
-        var trackDirectory = Path.Combine(tracksDirectory, track.Id);
-        var report = new JsonObject { ["source"] = "synthetic:test-circuit", ["phase"] = 1 };
-        AcTrackWriter.Write(track, trackDirectory, report);
-
-        Console.WriteLine($"Wrote {track.Ui.Name} to {trackDirectory}");
-        Console.WriteLine($"  length {track.MapPath.Length:0} m, {track.VisualMeshes.Count} visual meshes, {track.CollisionMeshes.Count} collision meshes, {track.Dummies.Count} dummies");
-        return 0;
-    }
+    return await root.Parse(args).InvokeAsync(new InvocationConfiguration { EnableDefaultExceptionHandler = false });
+}
+catch (Exception e) when (e is HttpRequestException or IOException or InvalidDataException or NotSupportedException)
+{
+    Console.Error.WriteLine($"error: {e.Message}");
+    return 1;
 }

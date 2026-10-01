@@ -74,6 +74,27 @@ public static partial class SteamLibraries
 
 public sealed record SteamLibrary(string Path, IReadOnlySet<int> AppIds);
 
+/// <summary>Trackmania install helpers.</summary>
+public static class TrackmaniaInstalls
+{
+    /// <summary>TMNF install folder: Steam first, then the standalone installer's default location.</summary>
+    [SupportedOSPlatform("windows")]
+    public static string? FindTmnf()
+    {
+        var steam = SteamLibraries.FindApp(SteamLibraries.TmNationsForeverAppId, "TrackMania Nations Forever");
+        if (steam is not null)
+        {
+            return steam;
+        }
+
+        var standalone = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "TmNationsForever");
+        return Directory.Exists(standalone) ? standalone : null;
+    }
+
+    [SupportedOSPlatform("windows")]
+    public static string? FindTm2020() => SteamLibraries.FindApp(SteamLibraries.Trackmania2020AppId, "Trackmania");
+}
+
 /// <summary>Assetto Corsa install helpers.</summary>
 public static class AssettoCorsa
 {
