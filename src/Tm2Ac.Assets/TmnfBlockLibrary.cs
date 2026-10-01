@@ -34,17 +34,20 @@ public sealed class TmnfBlockLibrary : IDisposable
     }
 
     /// <summary>
-    /// The geometry for a placed block: the variant with the requested index from the ground or air set. Falls back to
-    /// variant 0 of the same set, then to the other set, when the requested one is missing or empty.
+    /// The geometry for a placed block: the requested variant and sub-variant from the ground or air set. Falls back to
+    /// sub-variant 0, then any sub-variant of that variant, then variant 0 of the same set, then the other set, when the
+    /// requested one is missing or empty.
     /// </summary>
-    public ExtractedVariant? GetVariant(string blockName, bool isGround, int variant)
+    public ExtractedVariant? GetVariant(string blockName, bool isGround, int variant, int subVariant = 0)
     {
         var block = Get(blockName);
         static bool HasGeometry(ExtractedVariant v) => v.Parts.Count > 0 || v.Collision.Count > 0;
 
         var set = block.Variants.Where(v => v.IsGround == isGround).ToList();
         var other = block.Variants.Where(v => v.IsGround != isGround).ToList();
-        return set.FirstOrDefault(v => v.Index == variant && HasGeometry(v))
+        return set.FirstOrDefault(v => v.Index == variant && v.SubVariant == subVariant && HasGeometry(v))
+            ?? set.FirstOrDefault(v => v.Index == variant && v.SubVariant == 0 && HasGeometry(v))
+            ?? set.FirstOrDefault(v => v.Index == variant && HasGeometry(v))
             ?? set.FirstOrDefault(HasGeometry)
             ?? other.FirstOrDefault(HasGeometry);
     }

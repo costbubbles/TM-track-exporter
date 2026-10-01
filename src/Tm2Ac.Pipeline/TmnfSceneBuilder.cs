@@ -146,7 +146,7 @@ public sealed class TmnfSceneBuilder
         var groundCells = new HashSet<(int X, int Z)>();
         foreach (var block in map.Blocks)
         {
-            var placed = PlaceBlock(block.Name, block.Coord, block.Direction, block.IsGround, block.Variant);
+            var placed = PlaceBlock(block.Name, block.Coord, block.Direction, block.IsGround, block.Variant, block.SubVariant);
 
             // Terrain blocks (y = 0: pools, water, dirt, hills) replace the default grass; everything else gets grass
             // 5 cm below ground level so blocks with their own ground cover it and partial blocks show no holes.
@@ -182,14 +182,14 @@ public sealed class TmnfSceneBuilder
     }
 
     /// <summary>Places one block; returns the grid cells it covers and whether it has ground-level surface, or null if it had no geometry.</summary>
-    private (List<(int X, int Z)> Cells, bool ProvidesGround)? PlaceBlock(string name, GridCoord coord, TmDirection direction, bool isGround, int variant, bool countAsPlaced = true, string? onlyMaterial = null, float yOffset = 0)
+    private (List<(int X, int Z)> Cells, bool ProvidesGround)? PlaceBlock(string name, GridCoord coord, TmDirection direction, bool isGround, int variant, int subVariant = 0, bool countAsPlaced = true, string? onlyMaterial = null, float yOffset = 0)
     {
         var source = name;
-        var geometry = _library.GetVariant(name, isGround, variant);
+        var geometry = _library.GetVariant(name, isGround, variant, subVariant);
         if (geometry is null && BlockFlagTable.Tmnf.Fallback(name) is { } fallback)
         {
             source = fallback;
-            geometry = _library.GetVariant(fallback, isGround, variant);
+            geometry = _library.GetVariant(fallback, isGround, variant, subVariant);
             _issues.Add(IssueSeverity.Info, "ASSET_FALLBACK", name, $"{name} can't be extracted; using look-alike {fallback}");
         }
 

@@ -78,6 +78,7 @@ _Last updated: 2026-10-01_
 | 2026-10-01 | Known limitation accepted: occasional fall-through when hitting thin walls (common in AC track mods) |
 | 2026-10-01 | **No compatibility rating.** The tool ports every map as it is; drivability (jumps, loops, wall rides) isn't judged. Removed the analyzer, `analyze`, `--force` and Red refusal |
 | 2026-10-01 | Jumps over gaps get a `JUMPS` warning with the speed they need; conversion always proceeds |
+| 2026-10-01 | Block mobils are `[variant][subVariant]` alternatives; each placed block uses its own sub-variant (they were merged) |
 | 2026-10-01 | Desktop app uses a plain composition root, not a DI host; navigation is bound two-way so UI Automation can drive it |
 | 2026-10-01 | Default replay is gold-level (fastest replay not faster than gold), not the WR, because WRs use skips |
 
@@ -229,3 +230,4 @@ v0.1 run (2026-10-01, by the user over rounds 1–6 on R1, R3 and R2):
 - **2026-10-01:** Added the `JUMPS` warning (gap = no surface 10 m below the take-off/landing chord; required speed to the gap's far edge) and gold-level replay selection with a `REPLAY` note in the report. 116 offline tests pass.
 - **2026-10-01:** Round 6: A-to-B timing verified in game on R2 ESL-Hockolicious. v0.1 acceptance done.
 - **2026-10-01:** Released v0.1.0 (CLI) from a tag-triggered CI job. Built the Phase 8 desktop app (browse/detail/convert, library, settings, legal notice). Verified with UI Automation: search, select, Convert & Install into AC, Library and Settings. Fixed InstalledTracks crashing on the synthetic track's string `source`. 127 offline tests pass.
+- **2026-10-01:** User report on A02-Race (fences): blocks merged all sub-variant models. Now extracted per sub-variant and placed by `SubVariant`. The arena walls themselves are TM's design (dirt zones are walled). A02 reinstalled.

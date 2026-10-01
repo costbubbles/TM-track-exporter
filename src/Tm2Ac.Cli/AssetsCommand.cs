@@ -49,7 +49,7 @@ internal static class AssetsCommand
                 foreach (var id in ids)
                 {
                     var map = TmMapReader.Read(await client.DownloadMapAsync(TmGame.Tmnf, id, cancellationToken));
-                    var missing = map.Blocks.Where(b => library.GetVariant(b.Name, b.IsGround, b.Variant) is null)
+                    var missing = map.Blocks.Where(b => library.GetVariant(b.Name, b.IsGround, b.Variant, b.SubVariant) is null)
                         .GroupBy(b => b.Name).Select(g => $"{g.Key} x{g.Count()}").ToList();
                     Console.WriteLine($"  #{id} {map.Name}: {map.Blocks.Count} blocks, {(missing.Count == 0 ? "all have geometry" : $"MISSING {string.Join(", ", missing)}")}");
                 }

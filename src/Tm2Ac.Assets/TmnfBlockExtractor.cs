@@ -72,30 +72,41 @@ public sealed class TmnfBlockExtractor(TmnfPakFileSystem fs)
             return;
         }
 
+        // mobils[variant][subVariant]: sub-variants are alternative models of the same variant (e.g. a dirt border with or
+        // without its fence and billboard). Maps pick one per block, so each is kept separately, never merged.
         for (var index = 0; index < mobils.Length; index++)
         {
-            var variant = new ExtractedVariant(isGround, index);
-            foreach (var external in mobils[index] ?? [])
+            var alternatives = mobils[index] ?? [];
+            for (var sub = 0; sub < Math.Max(1, alternatives.Length); sub++)
             {
-                var mobil = Safe(() => external.Node, warnings, $"mobil {external.File?.FilePath}") ?? fs.OpenNode<CSceneMobil>(fs.ResolveReference(external.File) ?? "");
-                if (mobil is null)
+                var variant = new ExtractedVariant(isGround, index, sub);
+                if (sub < alternatives.Length)
                 {
-                    warnings.Add($"{(isGround ? "ground" : "air")}[{index}]: mobil {external.File?.FilePath} not found");
-                    continue;
+                    AddMobil(variant, alternatives[sub], warnings);
                 }
 
-                var solid = Safe(() => ResolveSolid(mobil.Item?.Solid), warnings, "solid");
-                if (solid is null)
-                {
-                    continue; // mobils without geometry exist (e.g. pure sound/trigger mobils), or the solid failed to parse
-                }
-
-                Safe(() => AddVisuals(variant, solid, warnings), warnings, $"visuals of {mobil.Item?.Solid?.TreeFile?.FilePath}");
-                Safe(() => AddCollision(variant, solid, warnings), warnings, $"collision of {mobil.Item?.Solid?.TreeFile?.FilePath}");
+                variants.Add(variant);
             }
-
-            variants.Add(variant);
         }
+    }
+
+    private void AddMobil(ExtractedVariant variant, External<CSceneMobil> external, List<string> warnings)
+    {
+        var mobil = Safe(() => external.Node, warnings, $"mobil {external.File?.FilePath}") ?? fs.OpenNode<CSceneMobil>(fs.ResolveReference(external.File) ?? "");
+        if (mobil is null)
+        {
+            warnings.Add($"{(variant.IsGround ? "ground" : "air")}[{variant.Index}.{variant.SubVariant}]: mobil {external.File?.FilePath} not found");
+            return;
+        }
+
+        var solid = Safe(() => ResolveSolid(mobil.Item?.Solid), warnings, "solid");
+        if (solid is null)
+        {
+            return; // mobils without geometry exist (e.g. pure sound/trigger mobils), or the solid failed to parse
+        }
+
+        Safe(() => AddVisuals(variant, solid, warnings), warnings, $"visuals of {mobil.Item?.Solid?.TreeFile?.FilePath}");
+        Safe(() => AddCollision(variant, solid, warnings), warnings, $"collision of {mobil.Item?.Solid?.TreeFile?.FilePath}");
     }
 
     /// <summary>A mobil's solid is often a stub whose Tree points at the real .Solid.Gbx (itself a CPlugSolid).</summary>
@@ -303,7 +314,7 @@ public sealed record ExtractedBlock(string Name)
     public IReadOnlyList<string> Warnings { get; init; } = [];
 }
 
-public sealed record ExtractedVariant(bool IsGround, int Index)
+public sealed record ExtractedVariant(bool IsGround, int Index, int SubVariant = 0)
 {
     public List<MeshPart> Parts { get; } = [];
 

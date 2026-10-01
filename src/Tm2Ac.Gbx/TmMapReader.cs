@@ -30,6 +30,7 @@ public static class TmMapReader
         {
             IsGround = b.IsGround,
             Variant = b.Variant,
+            SubVariant = b.SubVariant,
             IsPillar = b.IsPillar,
             IsClip = b.IsClip,
             Flags = b.Flags,

@@ -38,6 +38,9 @@ public sealed record TmBlock(string Name, GridCoord Coord, TmDirection Direction
 {
     public bool IsGround { get; init; }
     public int Variant { get; init; }
+
+    /// <summary>Which alternative model of the variant the block uses (63 for clips, which have none).</summary>
+    public int SubVariant { get; init; }
     public bool IsPillar { get; init; }
     public bool IsClip { get; init; }
     public int Flags { get; init; }

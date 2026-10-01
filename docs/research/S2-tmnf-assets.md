@@ -28,7 +28,7 @@ DDS format is DXT1 (diffuse) / DXT5 (normal), 1024×512 with full mips. AC-compa
 ## Object graph (confirmed)
 ```
 CGameCtnBlockInfoClassic  (Stadium\ConstructionBlockInfo\ConstructionBlockInfoClassic\<Block>.TMEDClassic.Gbx)
- ├─ GroundMobils[unit][variant] / AirMobils[unit][variant] → External<CSceneMobil>  (Stadium\Mobil\<Block>Ground.Mobil.Gbx)
+ ├─ GroundMobils[variant][subVariant] / AirMobils[variant][subVariant] → External<CSceneMobil>  (Stadium\Mobil\<Block>Ground.Mobil.Gbx)
  │    └─ Item: CHmsItem → Solid: CPlugSolid → TreeFile = "Media\Solid\...\Ground.Solid.Gbx" (resolve!)
  ├─ GroundBlockUnitInfos / AirBlockUnitInfos (per-unit offsets, clips, AcceptPylons)
  ├─ WayPointType, SpawnLocGround / SpawnLocAir (Iso4), PillarShapeMultiDir
@@ -56,6 +56,15 @@ the Turbo block land in exactly x∈[0,32], z∈[0,32].
 - LOD 0 visual: 3,120 triangles, 4,670 vertices, 12 materials.
 - Collision: 1,852 triangles. They need the owning tree's `Location` applied, since raw coords were at 48..80 × 40..72.
   Each triangle has a `SurfaceIndex` → `Surface.Materials[i]` → material → `SurfaceId`.
+
+## Sub-variants (verified 2026-10-01)
+- The inner array of `GroundMobils`/`AirMobils` holds **alternative models** of one variant, not parts of one model. A placed
+  block picks one with `CGameCtnBlock.SubVariant` (flags bits 6–11; 63 for clips). Example: `StadiumDirtBorder` variant 5 has
+  6 alternatives (different fence, billboard and awning layouts along the dirt arena wall), and A02-Race uses all six.
+- Merging the alternatives (the original implementation) stacked every layout on each block: doubled corner pieces and
+  decorations. Each alternative is now extracted separately, and placement uses the block's sub-variant (falling back to 0).
+- Dirt zones in TMNF are walled arenas: `StadiumDirtBorder` rings carry tall fences and billboards (≈15 m), with road
+  gaps where routes cross. That is TM's design, not a conversion artefact.
 
 ## Not yet done (moves to Phase 3)
 - Loading materials referenced from collision `SurfMaterial`s (nested refs) to read `SurfaceId` per collision triangle.
