@@ -14,7 +14,11 @@ namespace Tm2Ac.Pipeline;
 public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 Position, Vector3 Forward)> spawnOf, IssueList issues)
 {
     private const float GateHalfWidth = 16f;
+    /// <summary>Fallback drop from TM car-centre height to the road when there is no collision under a point.</summary>
     private const float SpawnDrop = 1.0f;
+
+    /// <summary>Dummies sit this far above the collision surface.</summary>
+    private const float DummyClearance = 0.05f;
     private const float GridSpacing = 8f;
     private const float GridLateral = 3f;
     private const float MergeCheckpointsWithinMs = 1000;
@@ -81,7 +85,7 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
             }
 
             // A to B: the timer starts just ahead of the spawn and stops at the finish the ghost reached.
-            var startGateCenter = spawnTm + (forwardTm * 2) - new Vector3(0, SpawnDrop, 0);
+            var startGateCenter = OnGround(spawnTm + (forwardTm * 2));
             AddGate(track, AcNames.AbStart, startGateCenter, forwardTm);
 
             var finish = (end is { } e ? finishes.MinBy(f => Vector3.Distance(BlockCenter(f), e)) : null) ?? finishes.FirstOrDefault() ?? lapBlock;
@@ -182,7 +186,7 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
             var nearest = ghost.Samples.MinBy(s => Vector3.DistanceSquared(new Vector3(s.Position.X, 0, s.Position.Z), new Vector3(center.X, 0, center.Z)))!;
             if (Vector3.Distance(nearest.Position, center) < MatchRadius)
             {
-                center.Y = nearest.Position.Y - SpawnDrop;
+                center = OnGround(center with { Y = nearest.Position.Y });
                 if (Vector3.Dot(nearest.Velocity, forward) < 0)
                 {
                     forward = -forward;
@@ -208,23 +212,28 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
         count = Math.Clamp(count, 1, 40);
         var forward = Vector3.Normalize(new Vector3(forwardTm.X, 0, forwardTm.Z));
         var left = AcAxes.Left(forward);
+        // Slots at car-centre height; each is then snapped to the surface under it (start pads are raised, see S5).
         var slots = new List<Vector3>();
         for (var n = 0; n < count; n++)
         {
             var lateral = n == 0 ? 0 : (n % 2 == 1 ? -GridLateral : GridLateral);
-            slots.Add(spawnTm - (forward * GridSpacing * n) + (left * lateral) - new Vector3(0, SpawnDrop, 0));
+            slots.Add(spawnTm - (forward * GridSpacing * n) + (left * lateral));
         }
 
-        var surfaceY = spawnTm.Y - SpawnDrop - 0.3f;
-        if (slots.Skip(1).Any(s => scene.SurfaceHeightBelow(s with { Y = s.Y + 1.5f }, 3f) is null))
+        float? platformY = null;
+        if (slots.Skip(1).Any(s => GroundHeight(s) is null))
         {
-            AddPlatform(track, spawnTm with { Y = surfaceY }, forward, left, count);
+            platformY = (GroundHeight(spawnTm) ?? (spawnTm.Y - SpawnDrop)) - 0.3f;
+            AddPlatform(track, spawnTm with { Y = platformY.Value }, forward, left, count);
             issues.Add(IssueSeverity.Info, "PIT_PLATFORM_GENERATED", "", "Not enough road behind the start for the grid; a flat platform was added behind the start block");
         }
 
         for (var n = 0; n < slots.Count; n++)
         {
-            var ac = scene.ToAc(slots[n]);
+            var grounded = GroundHeight(slots[n]) is { } y ? slots[n] with { Y = y + DummyClearance }
+                : platformY is { } py ? slots[n] with { Y = py + DummyClearance }
+                : slots[n] - new Vector3(0, SpawnDrop, 0);
+            var ac = scene.ToAc(grounded);
             track.Dummies.Add(new AcDummy(AcNames.Start(n), ac, forward));
             track.Dummies.Add(new AcDummy(AcNames.Pit(n), ac, forward));
         }
@@ -276,7 +285,7 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
     /// </summary>
     private void AddHotlapStart(AcTrackModel track, Vector3 spawnTm, Vector3 forwardTm, TmGhost? ghost)
     {
-        var position = spawnTm - new Vector3(0, SpawnDrop, 0);
+        var position = OnGround(spawnTm);
         var forward = forwardTm;
         if (Layout == RaceLayout.Circuit && ghost is not null)
         {
@@ -284,13 +293,20 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
             var sample = ghost.At(Math.Max(0, lapTime - 4000));
             if (sample.WheelsOnGround > 0 && sample.Velocity.LengthSquared() > 1)
             {
-                position = sample.Position - new Vector3(0, SpawnDrop, 0);
+                position = OnGround(sample.Position);
                 forward = sample.Velocity;
             }
         }
 
         track.Dummies.Add(new AcDummy(AcNames.HotlapStart, scene.ToAc(position), Vector3.Normalize(new Vector3(forward.X, 0, forward.Z))));
     }
+
+    /// <summary>Drivable surface height under a car-centre position (TM space), searching 4 m down; null if none.</summary>
+    private float? GroundHeight(Vector3 carCentreTm) => scene.SurfaceHeightBelow(carCentreTm + new Vector3(0, 0.5f, 0), 4f);
+
+    /// <summary>A car-centre position moved down onto the surface under it (falls back to a fixed drop).</summary>
+    private Vector3 OnGround(Vector3 carCentreTm) =>
+        GroundHeight(carCentreTm) is { } y ? carCentreTm with { Y = y + DummyClearance } : carCentreTm - new Vector3(0, SpawnDrop, 0);
 
     /// <summary>Centre of a 1×1 block at road height (TM space).</summary>
     private static Vector3 BlockCenter(TmBlock block) =>

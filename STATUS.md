@@ -69,6 +69,8 @@ _Last updated: 2026-09-30_
 | 2026-10-01 | The default grass fill uses only the 2-triangle ground quad (blades would add ~1.2M triangles per map) |
 | 2026-10-01 | TM UVs are V-flipped (v → 1 − v) on extraction. Verified on road and sign textures, with no horizontal mirroring |
 | 2026-10-01 | TM `Rubber` (raised kerbs, inflatables) maps to AC `KERB` (friction 0.92, kerb rumble) |
+| 2026-10-01 | All AC_* dummies snap to the collision surface (TM start pads are raised) |
+| 2026-10-01 | TM "VDep" vertex-tinted grass fringe is not converted |
 
 ## Open questions
 
@@ -87,6 +89,14 @@ See [tests/reference-maps.md](tests/reference-maps.md): R1–R7, from the simple
 - Edges didn't feel like tarmac → they're TM rubber kerbs, now mapped to AC KERB.
 
 R1/R3 reinstalled for round 2.
+
+**Round 2 feedback (2026-10-01):**
+- White sawtooth band where grass meets tarmac → TM grass-blade fringe ("VDep Fence") needs a per-vertex tint AC can't do. **Dropped.**
+  This also cut Rockridge from 1.15M to 0.5M visual triangles.
+- Collision glitch on the start ramp where the pit crew stands → spawn/pit dummies were 0.8 m inside the raised start pad.
+  **Fixed**: dummies now snap to the collision surface.
+
+R1/R3 reinstalled for round 3.
 
 Installed in AC on 2026-10-01: **`tmnf_18451_always_be_mine`** (R1, A to B) and **`tmnf_1531338_rockridge`** (R3, 2-lap circuit).
 If something is badly wrong, roll back with git: each phase is its own commit.
@@ -179,3 +189,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - README, single-file publish config, CI artifact.
   - 130 tests pass.
 - **2026-10-01:** In-game check round 1 found swapped road/kerb textures, caused by the TM V axis. Fixed the UV flip, mapped Rubber to KERB, and reinstalled R1/R3. Also landed the Phase 8 groundwork (AppSettings, InstalledTracks, converter progress/cancellation). 132 tests pass.
+- **2026-10-01:** In-game round 2 fixes: grass fringe dropped and dummies snapped to the surface. R1/R3 reinstalled. 134 tests pass.

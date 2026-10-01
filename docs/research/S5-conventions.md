@@ -71,3 +71,9 @@ Is TM's world left-handed relative to AC's? Mapping (x, y, z) → (x, y, z) dire
 2. In Phase 4, convert a TMNF map whose first corner is known (from the TMX screenshot or by driving it in TMNF) and
    compare.
 3. Fix `TmToAcTransform` (probably negate X or Z) and lock it with a unit test using a known asymmetric map.
+
+## Spawn heights (found in in-game check round 2, 2026-10-01)
+TM spawn locations are at car-centre height, about 2.2 m above the block base. A fixed 1 m drop works on flat road, but
+**`StadiumRoadMainStartLine` has a raised start pad** (local y 2.0, road 1.34). The fixed drop put the AC spawn and pit
+dummies ~0.8 m inside the pad, which caused the collision glitch at the start ramp. All AC_* dummies are now snapped to the
+collision surface under them (+5 cm). There's a regression test on R1.

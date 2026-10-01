@@ -71,8 +71,13 @@ public sealed class MaterialTranslator(Func<string, byte[]?> readTexture)
         return material;
     }
 
+    /// <summary>
+    /// Materials not rendered in AC: additive glows, fake shadows, and vertex-tinted grass blades ("VDep Fence": the texture
+    /// is pale grey and TM tints it per vertex, so in AC it shows as a white sawtooth fringe along grass edges).
+    /// </summary>
     public static bool IsDropped(string? baseShader) =>
-        baseShader is not null && (baseShader.Contains("TAdd", StringComparison.Ordinal)
+        baseShader is not null && (baseShader.StartsWith("VDep", StringComparison.Ordinal)
+            || baseShader.Contains("TAdd", StringComparison.Ordinal)
             || baseShader.Contains(" Add", StringComparison.Ordinal)
             || baseShader.Contains("ShadowSkirt", StringComparison.Ordinal));
 

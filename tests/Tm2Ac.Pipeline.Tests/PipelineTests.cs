@@ -120,7 +120,7 @@ public class MaterialTranslatorTests
     [Fact]
     public void AlphaShadersAreAlphaTested()
     {
-        var m = Translator().Translate("b", Material("VDep Fence", ("FenceA", @"X\Fence.dds")))!;
+        var m = Translator().Translate("b", Material("TSelfI TDiffA PX2", ("FenceA", @"X\Fence.dds")))!;
         Assert.Equal(("ksPerPixelAT", true, "Fence.dds"), (m.Shader, m.AlphaTested, m.DiffuseTexture));
     }
 
@@ -128,6 +128,7 @@ public class MaterialTranslatorTests
     [InlineData("TAdd Night")]
     [InlineData("TSelfI Add")]
     [InlineData("ShadowSkirt")]
+    [InlineData("VDep Fence")]
     public void GlowAndFakeShadowMaterialsAreDropped(string shader) =>
         Assert.Null(Translator().Translate("c", Material(shader, ("Diffuse", @"X\Glow.dds"))));
 
@@ -434,4 +435,36 @@ public sealed class CompatibilityLiveTests
     [InlineData(93481, CompatibilityRating.Red)]      // R5 Smooth Life: loop (upside down 1.4 s)
     [InlineData(924307, CompatibilityRating.Red)]     // R7 PressForward: loops, 9 s flight
     public async Task RatesReferenceMaps(long id, CompatibilityRating expected) => Assert.Equal(expected, await RateMap(id));
+}
+
+[Trait("Category", "Assets")]
+[Trait("Category", "Network")]
+public sealed class SpawnHeightTests : IDisposable
+{
+    private readonly string _out = Path.Combine(Path.GetTempPath(), "tm2ac-spawn-" + Guid.NewGuid().ToString("N"));
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_out))
+        {
+            Directory.Delete(_out, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task SpawnSitsOnTheRaisedStartPad()
+    {
+        // R1's StadiumRoadMainStartLine has a start pad at local y = 2.0 (road 1.34). The block is at y = 1 (TM 8 m), and AC y = TM y - 9,
+        // so the pad surface is at AC y = 1.0. A fixed 1 m drop from the 2.21 m spawn would have put the dummy inside the pad (AC 0.21).
+        var tmnf = OperatingSystem.IsWindows() ? TrackmaniaInstalls.FindTmnf() : null;
+        Assert.SkipWhen(tmnf is null, "Needs a local TMNF install.");
+        using var library = TmnfBlockLibrary.Open(tmnf!);
+        using var client = TmxClient.CreateDefault();
+        var source = await ConversionSource.FromTmxAsync(client, TmGame.Tmnf, 18451, cancellationToken: TestContext.Current.CancellationToken);
+        var result = new TmnfConverter(library).Convert(source, new ConversionOptions(), _out, cancellationToken: TestContext.Current.CancellationToken);
+
+        var visual = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, result.TrackId + ".kn5"));
+        var start = visual.Root.Children.OfType<Kn5.Kn5DummyNode>().Single(d => d.Name == "AC_START_0").Transform.Translation;
+        Assert.Equal(1.05f, start.Y, 2);
+    }
 }
