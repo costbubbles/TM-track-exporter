@@ -337,3 +337,39 @@ public sealed class RouteTests : IDisposable
         Assert.NotEqual("a2b", (string?)ui["run"]);
     }
 }
+
+public class AiLineMathTests
+{
+    [Fact]
+    public void ResamplesAtEvenSpacing()
+    {
+        var points = AiLineBuilder.Resample([Vector3.Zero, new Vector3(0, 0, 10), new Vector3(10, 0, 10)], 1.5f);
+
+        Assert.Equal(new Vector3(0, 0, 0), points[0]);
+        for (var i = 1; i < points.Count; i++)
+        {
+            Assert.InRange(Vector3.Distance(points[i - 1], points[i]), 1.0f, 1.5001f); // spaced by arc length; the chord across the corner is shorter
+        }
+
+        Assert.Equal(14, points.Count); // 20 m / 1.5 m + start
+    }
+
+    [Fact]
+    public void SpeedDropsIntoCornersAndBrakesBeforeThem()
+    {
+        // 450 m straight, then a tight 20 m radius corner.
+        var straight = Enumerable.Range(0, 300).Select(i => new Vector3(0, 0, i * 1.5f));
+        var corner = Enumerable.Range(1, 30).Select(i =>
+        {
+            var a = i / 30f * MathF.PI / 2;
+            return new Vector3(-20 + (20 * MathF.Cos(a)), 0, 448.5f + (20 * MathF.Sin(a)));
+        });
+        var ai = AiLineBuilder.Annotate([.. straight, .. corner], closed: false, scale: 1);
+
+        var cornerSpeed = ai[315].Speed;
+        Assert.InRange(cornerSpeed, 14, 20);                                   // sqrt(1.4 * 9.81 * 20) ≈ 16.6 m/s
+        Assert.True(ai[60].Speed > cornerSpeed * 3);                            // much faster on the straight
+        Assert.Equal(1f, ai[20].Gas);                                          // flat out early on the straight
+        Assert.Contains(ai.Skip(200).Take(100), p => p.Brake == 1f);           // braking in the run-up to the corner
+    }
+}

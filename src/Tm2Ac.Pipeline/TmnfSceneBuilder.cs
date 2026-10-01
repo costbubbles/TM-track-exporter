@@ -55,14 +55,38 @@ public sealed class TmnfSceneBuilder
     /// </summary>
     public float? SurfaceHeightBelow(Vector3 tmPosition, float maxDrop)
     {
+        _surfaceIndex ??= BuildSurfaceIndex();
         var ac = ToAc(tmPosition);
         var p = new Vector2(ac.X, ac.Z);
-        var cx = (int)MathF.Floor(tmPosition.X / ChunkSize);
-        var cz = (int)MathF.Floor(tmPosition.Z / ChunkSize);
-        float? best = null;
-        foreach (var ((key, x, z), mesh) in _collision)
+        if (!_surfaceIndex.TryGetValue(SurfaceCell(p), out var triangles))
         {
-            if (key == SurfaceKeys.Wall || Math.Abs(x - cx) > 1 || Math.Abs(z - cz) > 1)
+            return null;
+        }
+
+        float? best = null;
+        foreach (var (a, b, c) in triangles)
+        {
+            if (HeightInTriangle(p, a, b, c) is { } y && y <= ac.Y && y >= ac.Y - (maxDrop * _scale) && (best is null || y > best))
+            {
+                best = y;
+            }
+        }
+
+        return best is { } h ? (h / _scale) + GroundLevel : null;
+    }
+
+    private const float SurfaceCellSize = 8f;
+    private Dictionary<(int X, int Z), List<(Vector3 A, Vector3 B, Vector3 C)>>? _surfaceIndex;
+
+    private (int X, int Z) SurfaceCell(Vector2 ac) => ((int)MathF.Floor(ac.X / (SurfaceCellSize * _scale)), (int)MathF.Floor(ac.Y / (SurfaceCellSize * _scale)));
+
+    /// <summary>Drivable collision triangles (AC space) bucketed by the XZ cells their bounding boxes touch.</summary>
+    private Dictionary<(int X, int Z), List<(Vector3 A, Vector3 B, Vector3 C)>> BuildSurfaceIndex()
+    {
+        var index = new Dictionary<(int X, int Z), List<(Vector3, Vector3, Vector3)>>();
+        foreach (var ((key, _, _), mesh) in _collision)
+        {
+            if (key == SurfaceKeys.Wall)
             {
                 continue;
             }
@@ -72,14 +96,24 @@ public sealed class TmnfSceneBuilder
                 var a = mesh.Positions[mesh.Indices[t]];
                 var b = mesh.Positions[mesh.Indices[t + 1]];
                 var c = mesh.Positions[mesh.Indices[t + 2]];
-                if (HeightInTriangle(p, a, b, c) is { } y && y <= ac.Y && y >= ac.Y - (maxDrop * _scale) && (best is null || y > best))
+                var min = SurfaceCell(new Vector2(MathF.Min(a.X, MathF.Min(b.X, c.X)), MathF.Min(a.Z, MathF.Min(b.Z, c.Z))));
+                var max = SurfaceCell(new Vector2(MathF.Max(a.X, MathF.Max(b.X, c.X)), MathF.Max(a.Z, MathF.Max(b.Z, c.Z))));
+                for (var x = min.X; x <= max.X; x++)
                 {
-                    best = y;
+                    for (var z = min.Z; z <= max.Z; z++)
+                    {
+                        if (!index.TryGetValue((x, z), out var list))
+                        {
+                            index[(x, z)] = list = [];
+                        }
+
+                        list.Add((a, b, c));
+                    }
                 }
             }
         }
 
-        return best is { } h ? (h / _scale) + GroundLevel : null;
+        return index;
     }
 
     /// <summary>Y of triangle abc at XZ point p (barycentric), or null when p is outside it.</summary>

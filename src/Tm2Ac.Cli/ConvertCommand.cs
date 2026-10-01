@@ -19,8 +19,9 @@ internal static class ConvertCommand
         var replay = new Option<string?>("--replay") { Description = "TMX replay id or a local .Replay.Gbx/.Ghost.Gbx for the AI line and checkpoint order (default: TMX world record)." };
         var pitboxes = new Option<int>("--pitboxes") { Description = "Grid slots and pit boxes.", DefaultValueFactory = _ => 10 };
         var noGrass = new Option<bool>("--no-grass") { Description = "Don't fill empty ground cells with the default Stadium grass." };
+        var zip = new Option<FileInfo?>("--zip") { Description = "Also write a zip that Content Manager can install by drag and drop." };
 
-        var command = new Command("convert", "Convert a Trackmania map into an Assetto Corsa track and install it.") { game, target, outOption, acPath, scale, replay, pitboxes, noGrass };
+        var command = new Command("convert", "Convert a Trackmania map into an Assetto Corsa track and install it.") { game, target, outOption, acPath, scale, replay, pitboxes, noGrass, zip };
         command.SetAction(async (result, cancellationToken) =>
         {
             if (!CliCommon.TryGetGame(result.GetValue(game)!, out var tmGame))
@@ -79,6 +80,13 @@ internal static class ConvertCommand
 
             Console.WriteLine($"Wrote {conversion.TrackId} to {conversion.Directory}");
             Console.WriteLine($"  {conversion.Blocks} blocks, {conversion.VisualTriangles:N0} visual / {conversion.CollisionTriangles:N0} collision triangles, {conversion.Elapsed.TotalSeconds:0.0} s");
+            if (result.GetValue(zip) is { } zipFile)
+            {
+                File.Delete(zipFile.FullName);
+                System.IO.Compression.ZipFile.CreateFromDirectory(conversion.Directory, zipFile.FullName, System.IO.Compression.CompressionLevel.Optimal, includeBaseDirectory: true);
+                Console.WriteLine($"  zip: {zipFile.FullName}");
+            }
+
             foreach (var issue in conversion.Issues)
             {
                 Console.WriteLine($"  [{issue.Severity}] {issue.Code}: {issue.Message}");

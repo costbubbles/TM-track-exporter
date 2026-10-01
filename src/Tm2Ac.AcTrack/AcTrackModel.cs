@@ -29,6 +29,9 @@ public sealed class AcTrackModel
     /// <summary>The driving line drawn into map.png and outline.png.</summary>
     public required Centerline MapPath { get; set; }
 
+    /// <summary>AI racing line (ai/fast_lane.ai); null writes no AI file.</summary>
+    public IReadOnlyList<AiPoint>? AiLine { get; set; }
+
     /// <summary>Optional ui/preview.png contents; a generated image is used when null.</summary>
     public byte[]? PreviewPng { get; init; }
 }

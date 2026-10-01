@@ -22,6 +22,9 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
 
     public RaceLayout Layout { get; private set; }
 
+    /// <summary>Ghost times (ms) at which the start/finish line was crossed, in order.</summary>
+    public IReadOnlyList<int> LapLineTimes { get; private set; } = [];
+
     /// <summary>Checkpoint blocks in driving order (first lap), when known.</summary>
     public IReadOnlyList<TmBlock> OrderedCheckpoints { get; private set; } = [];
 
@@ -49,6 +52,10 @@ public sealed class RouteBuilder(TmnfSceneBuilder scene, Func<TmBlock, (Vector3 
         Layout = options.Layout ?? DetectLayout(map, lapBlock, crossings);
 
         var lapCheckpoints = FirstLapCheckpoints(crossings);
+        // On lap races a finish block next to the line can be the nearest waypoint when the line is crossed.
+        LapLineTimes = crossings
+            .Where(c => c.Block.Waypoint == TmWaypoint.StartFinish || (Layout == RaceLayout.Circuit && map.Laps > 1 && c.Block.Waypoint == TmWaypoint.Finish))
+            .Select(c => c.TimeMs).ToList();
         OrderedCheckpoints = lapCheckpoints;
 
         if (Layout == RaceLayout.Circuit && lapBlock is not null)

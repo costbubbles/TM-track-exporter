@@ -37,6 +37,12 @@ public static class AcTrackWriter
         GrooveIni().Save(Path.Combine(data, "groove.ini"));
         CamerasIni(track).Save(Path.Combine(data, "cameras.ini"));
 
+        if (track.AiLine is { Count: > 1 } aiLine)
+        {
+            var aiDirectory = Directory.CreateDirectory(Path.Combine(trackDirectory, "ai")).FullName;
+            FastLaneAi.Write(aiLine, Path.Combine(aiDirectory, "fast_lane.ai"));
+        }
+
         var layout = MapLayout.FromPath(track.MapPath.Points);
         layout.ToIni().Save(Path.Combine(data, "map.ini"));
         File.WriteAllBytes(Path.Combine(trackDirectory, "map.png"), MapImages.RenderMap(track.MapPath, layout));

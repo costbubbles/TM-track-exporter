@@ -26,7 +26,24 @@ then spatial grid:
 - Point 0 is near the start/finish line, and the line runs in race direction.
 - `drift/ai/fast_lane.ai` is only 12 bytes (`7, 0, 0`), so AC tolerates an empty/stub AI file. That gives us a safe "no AI" fallback.
 
-## Plan
+## Grid not required (verified Phase 6)
+A header-only scan of all 333 fast_lane.ai files on the dev machine found:
+
+| Files | What follows the extras |
+|---|---|
+| 310 | The spatial grid (flag 1) |
+| **19** | **flag 0 and nothing else** (e.g. `fn_nurburgring/*`, `dousojin_touge`) |
+| 3 | Nothing at all (e.g. `ek_hakone_turnpike/downhill_*`, `the_isle_of_man_tt`) |
+| 1 | 12-byte stub (`drift`) |
+
+So working tracks ship without the grid and AC builds it itself. **We write flag 0.**
+
+The grid's real structure is not a fixed W×H array. It begins with lists of `count=10` + 10 nearest-point indices, then
+variable-length lists. It is left undecoded because it isn't needed.
+
+Some community files fill the extras with zeros apart from `direction` (dousojin_touge), so AC tolerates sparse extras.
+
+## Plan (original)
 1. Phase 6: write version 7 with points + extras, and try `hasGrid = 0` with no grid.
 2. If AC rejects that, implement the grid: bucket point indices on a 2D XZ grid with `samplingFactor` m cells.
 3. Validate in game: AI drives a lap. Re-read our own file with the probe reader.

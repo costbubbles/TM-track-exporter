@@ -91,6 +91,11 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         var route = new RouteBuilder(builder, SpawnOf, issues);
         route.Build(map, ghost, track, options);
         var circuit = route.Layout == RaceLayout.Circuit;
+        if (ghost is not null)
+        {
+            track.AiLine = AiLineBuilder.Build(ghost, route.Layout, route.LapLineTimes, builder, issues);
+        }
+
         track.MapPath = new Centerline(MapPath(map, ghost, builder, circuit), closed: circuit);
         track.Ui = track.Ui with
         {

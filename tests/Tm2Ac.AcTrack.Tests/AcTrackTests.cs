@@ -177,3 +177,31 @@ public sealed class TestCircuitWriterTests : IDisposable
         AcTrackWriter.Write(track, dir);
     }
 }
+
+public class FastLaneAiTests
+{
+    [Fact]
+    public void RoundTripsPointsAndWritesNoGridFlag()
+    {
+        AiPoint[] points =
+        [
+            new(new Vector3(0, 0, 0), 30, 1, 0, 500, 7, 8) { Forward = Vector3.UnitZ, Direction = 1 },
+            new(new Vector3(0, 0, 1.5f), 29, 0, 1, 450, 7, 8) { Forward = Vector3.UnitZ, Direction = -1 },
+            new(new Vector3(0, 0.5f, 3), 28, 0, 1, 400, 6, 9) { Forward = Vector3.UnitZ },
+        ];
+        using var stream = new MemoryStream();
+        FastLaneAi.Write(points, stream);
+        var bytes = stream.ToArray();
+
+        // header 16 + points 3*20 + extras count 4 + extras 3*72 + grid flag 4
+        Assert.Equal(16 + 60 + 4 + 216 + 4, bytes.Length);
+        Assert.Equal(7, BitConverter.ToInt32(bytes, 0));
+        Assert.Equal(0, BitConverter.ToInt32(bytes, bytes.Length - 4));
+        Assert.Equal(1.5f, BitConverter.ToSingle(bytes, 16 + 20 + 12)); // cumulative length of point 1
+
+        var read = FastLaneAi.Read(new MemoryStream(bytes));
+        Assert.Equal(3, read.Count);
+        Assert.Equal(new Vector3(0, 0.5f, 3), read[2].Position);
+        Assert.Equal((29f, 0f, 1f, 450f, 7f, 8f, -1f), (read[1].Speed, read[1].Gas, read[1].Brake, read[1].Radius, read[1].SideLeft, read[1].SideRight, read[1].Direction));
+    }
+}

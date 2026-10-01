@@ -6,9 +6,9 @@ _Last updated: 2026-09-30_
 
 | | |
 |---|---|
-| **Phase** | 5 code done (manual check queued). Next is **Phase 6: AI line, UI assets, CSP config** |
+| **Phase** | 6 code done (manual check queued). Next is **Phase 7: compatibility analysis → v0.1** |
 | **Release** | none |
-| **Next up** | fast_lane.ai from the ghost (and centerline fallback), CSP ext_config (mood/lighting), --zip export |
+| **Next up** | Compatibility rating (block flags + ghost heuristics), `tm2ac analyze`, refuse Red without --force, README, v0.1 release build |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -22,8 +22,8 @@ _Last updated: 2026-09-30_
 | 3 TMNF asset extraction | ✅ done (2026-10-01) |
 | 4 Geometry → first TMNF track in AC | ✅ code done, 🟨 in-game check queued |
 | 5 Route, timing, spawns, pits | ✅ code done, 🟨 in-game check queued |
-| 6 AI line, UI assets, CSP config | 🟨 next |
-| 7 Compatibility → v0.1 (CLI) | ⬜ |
+| 6 AI line, UI assets, CSP config | ✅ code done, 🟨 in-game check queued |
+| 7 Compatibility → v0.1 (CLI) | 🟨 next |
 | 8 Desktop app → v0.2 | ⬜ |
 | 9 TM2020 → v0.3 | ⬜ |
 
@@ -92,6 +92,8 @@ If something is badly wrong, roll back with git: each phase is its own commit.
    - R3 in Hotlap/Practice: laps count at the start/finish line, and 4 sector splits show.
    - Grid/pits: Race mode lines cars up behind the start, and "return to pits" works.
 3. **Performance:** load time and FPS on R3 (1.1M visual triangles). Note if it's too heavy.
+4. **Phase 6 AI (R3 Rockridge):** add AI opponents in Race/Practice. They should follow the line and finish laps, though they may be
+   cautious or crash at jumps. Content Manager's track page should show the TMX screenshot preview, the outline, and the author/url.
 
 ## Phase 1 in-game checklist (`Tm2Ac Test Circuit (L)`): ✅ all passed 2026-10-01
 
@@ -157,3 +159,7 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - **2026-10-01:** Phase 5.
   - Route builder: layout detection from ghost crossings, ordered sectors, A-to-B gates, validated grid and pits with a platform fallback, hotlap start and run direction.
   - Installed R1 and R3 into AC for the user's check. 118 tests pass.
+- **2026-10-01:** Phase 6.
+  - fast_lane.ai writer (no grid, per 19 working tracks) and an AI line from the ghost lap with AC-grip speed targets.
+  - Indexed surface query, `--zip` export.
+  - R1 and R3 reinstalled with AI. 121 tests pass.
