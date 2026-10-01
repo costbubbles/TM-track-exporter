@@ -372,6 +372,71 @@ public sealed class RouteTests : IDisposable
     }
 }
 
+public class ReplayAndJumpTests
+{
+    private static readonly TmxReplay[] Replays = [new(1, 20_000, "wr", true), new(2, 23_500, "a", false), new(3, 25_000, "b", false), new(4, 31_000, "c", false)];
+
+    [Fact]
+    public void PicksTheFastestReplayNotFasterThanGold() => Assert.Equal(3, ConversionSource.PickGoldReplay(Replays, goldTimeMs: 24_000)!.Id);
+
+    [Fact]
+    public void PicksTheSlowestWhenEveryReplayBeatsGold() => Assert.Equal(4, ConversionSource.PickGoldReplay(Replays, goldTimeMs: 40_000)!.Id);
+
+    [Fact]
+    public void PicksTheRecordWithoutAGoldTime() => Assert.Equal(1, ConversionSource.PickGoldReplay(Replays, goldTimeMs: null)!.Id);
+
+    [Fact]
+    public void NoReplaysMeansNoPick() => Assert.Null(ConversionSource.PickGoldReplay([], 24_000));
+
+    [Fact]
+    public void RequiredSpeedMatchesProjectileRange()
+    {
+        // 45°, level landing: range = v²/g, so 100 m needs √(9.81·100) ≈ 31.3 m/s.
+        Assert.Equal(MathF.Sqrt(981), JumpDetector.RequiredSpeed(new Vector3(0, 1, 1), 100, 0), 2);
+        // Flat launch to a higher landing can never make it.
+        Assert.True(float.IsPositiveInfinity(JumpDetector.RequiredSpeed(Vector3.UnitZ, 50, -5)));
+    }
+
+    private static TmGhost Flight(int airborneSamples)
+    {
+        var samples = Enumerable.Range(0, 30).Select(i =>
+        {
+            var air = i >= 10 && i < 10 + airborneSamples;
+            return new TmGhostSample(i * 100, new Vector3(0, 20, i * 10), new Vector3(0, 0, 100), Vector3.UnitY, air ? 0 : 4, "Asphalt");
+        }).ToArray();
+        return new TmGhost(3000, [], samples, 100);
+    }
+
+    [Fact]
+    public void FlightsOverAGapAreJumps()
+    {
+        // Road only before z = 100 and after z = 200: the middle of the flight has nothing below.
+        var jumps = JumpDetector.Find(Flight(10), (p, _) => p.Z is < 100 or > 200 ? 19.9f : null, scale: 1);
+
+        var jump = Assert.Single(jumps);
+        Assert.Equal(900, jump.TimeMs);
+        Assert.Equal(110, jump.Distance, 1); // the far edge (z = 200) is where the replay landed too
+        Assert.True(float.IsPositiveInfinity(jump.RequiredKmh)); // flat launch, level landing
+    }
+
+    [Fact]
+    public void CrestsOverContinuousRoadAndShortHopsAreNot()
+    {
+        Assert.Empty(JumpDetector.Find(Flight(10), (_, _) => 19.9f, scale: 1));
+        Assert.Empty(JumpDetector.Find(Flight(3), (_, _) => null, scale: 1));
+    }
+
+    [Fact]
+    public void JumpsAreAWarningNotABlock()
+    {
+        var issues = new IssueList();
+        JumpDetector.Report([new Jump(5000, 150, -6, 372)], issues);
+        var issue = Assert.Single(issues.ToList());
+        Assert.Equal((IssueSeverity.Warn, "JUMPS"), (issue.Severity, issue.Code));
+        Assert.Contains("372 km/h", issue.Message, StringComparison.Ordinal);
+    }
+}
+
 [Trait("Category", "Assets")]
 [Trait("Category", "Network")]
 public sealed class SpawnHeightTests : IDisposable

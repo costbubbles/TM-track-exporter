@@ -44,6 +44,7 @@ public static class TmMapReader
             Collection = map.Collection?.ToString() ?? "",
             Mood = MoodFromDecoration(map.Decoration?.Id),
             AuthorTimeMs = map.AuthorTime is { } time ? (int)time.TotalMilliseconds : null,
+            GoldTimeMs = map.GoldTime is { } gold ? (int)gold.TotalMilliseconds : null,
             IsLapRace = map.IsLapRace,
             Laps = map.NbLaps,
             Size = new GridCoord(map.Size.X, map.Size.Y, map.Size.Z),

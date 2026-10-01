@@ -16,7 +16,7 @@ internal static class ConvertCommand
         var outOption = new Option<DirectoryInfo?>("--out") { Description = "Write the track folder under this directory instead of AC's content/tracks." };
         var acPath = new Option<DirectoryInfo?>("--ac-path") { Description = "Assetto Corsa install folder (auto-detected when omitted)." };
         var scale = new Option<float>("--scale") { Description = "Uniform world scale, 0.25–4 (e.g. 1.5 for road cars, 2 for GT).", DefaultValueFactory = _ => 1f };
-        var replay = new Option<string?>("--replay") { Description = "TMX replay id or a local .Replay.Gbx/.Ghost.Gbx for checkpoint order and the minimap (default: TMX world record)." };
+        var replay = new Option<string?>("--replay") { Description = "TMX replay id or a local .Replay.Gbx/.Ghost.Gbx for checkpoint order and the minimap (default: the fastest TMX replay that isn't faster than the gold medal)." };
         var pitboxes = new Option<int>("--pitboxes") { Description = "Grid slots and pit boxes. Default 1: everyone starts at the start line; more adds a grid behind it.", DefaultValueFactory = _ => 1 };
         var noGrass = new Option<bool>("--no-grass") { Description = "Don't fill empty ground cells with the default Stadium grass." };
         var zip = new Option<FileInfo?>("--zip") { Description = "Also write a zip that Content Manager can install by drag and drop." };
@@ -60,7 +60,7 @@ internal static class ConvertCommand
                 source = await ConversionSource.FromTmxAsync(client, tmGame, tmxId, replayId, cancellationToken);
                 if (replayValue is not null && replayId is null)
                 {
-                    source = source with { GhostPath = replayValue };
+                    source = source with { GhostPath = replayValue, ReplayNote = $"Replay file {replayValue} (chosen by the user)" };
                 }
             }
             else if (File.Exists(value))

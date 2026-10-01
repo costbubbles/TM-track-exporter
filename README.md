@@ -31,7 +31,7 @@ The track then shows up in Content Manager and AC as e.g. `tmnf_18451_always_be_
 | `--scale 1.5` | Scale the whole track. TM tracks are built for very fast cars; 1.5–2 suits road and GT cars |
 | `--out <dir>` | Write the track folder somewhere else instead of installing it |
 | `--zip <file.zip>` | Also produce a zip you can drag into Content Manager |
-| `--replay <id or file>` | Use a specific replay for checkpoint order and the minimap (default: the TMX world record) |
+| `--replay <id or file>` | Use a specific replay for checkpoint order and the minimap (default: the fastest TMX replay that isn't faster than the gold medal, since world records often use skips) |
 | `--pitboxes <n>` | Grid slots and pit boxes. Default 1 (everyone starts at the start line); more adds a grid behind it |
 
 ## What gets converted
@@ -45,7 +45,8 @@ The track then shows up in Content Manager and AC as e.g. `tmnf_18451_always_be_
 | TMX metadata and screenshot | `ui_track.json`, preview and outline for Content Manager |
 
 Every track is ported as it is. Trackmania routes can need things Assetto Corsa cars can't do (loops, wall riding, jumps
-built for 400+ km/h); the tool doesn't try to judge that. Details of every conversion are in `conversion-report.json` in
+built for 400+ km/h); the tool converts them anyway. If the replay jumps over gaps, the conversion warns you how fast the hardest jump needs
+you to go. Details of every conversion are in `conversion-report.json` in
 the track folder.
 
 ## Legal

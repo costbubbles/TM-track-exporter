@@ -20,6 +20,7 @@ public sealed record TmMap
     public required string Mood { get; init; }
 
     public int? AuthorTimeMs { get; init; }
+    public int? GoldTimeMs { get; init; }
     public bool IsLapRace { get; init; }
     public int Laps { get; init; }
     public required GridCoord Size { get; init; }

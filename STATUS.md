@@ -77,6 +77,8 @@ _Last updated: 2026-10-01_
 | 2026-10-01 | One starting spot by default: AC_START_0 = AC_PIT_0 = AC_HOTLAP_START_0 = start block spawn. `--pitboxes N` adds a grid |
 | 2026-10-01 | Known limitation accepted: occasional fall-through when hitting thin walls (common in AC track mods) |
 | 2026-10-01 | **No compatibility rating.** The tool ports every map as it is; drivability (jumps, loops, wall rides) isn't judged. Removed the analyzer, `analyze`, `--force` and Red refusal |
+| 2026-10-01 | Jumps over gaps get a `JUMPS` warning with the speed they need; conversion always proceeds |
+| 2026-10-01 | Default replay is gold-level (fastest replay not faster than gold), not the WR, because WRs use skips |
 
 ## Open questions
 
@@ -221,3 +223,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - **2026-10-01:** Round 4 fixes: single start spot (hotlap at the start line, 1 pit box by default). Wall fall-through accepted as a known limitation. 135 tests pass.
 - **2026-10-01:** Round 5: start-pad clipping traced to a mod car's minimal hitboxes plus AC's hub raycast with steep steps. Geometry verified sound. Logged as a known limitation.
 - **2026-10-01:** Removed the compatibility rating at the user's request (R1's finish jump is too far for AC, but that's for the player to find out). Deleted CompatibilityAnalyzer, `tm2ac analyze`, `--force`, the loop/wallride block flags and the rating/ghost stats in the report. 108 offline tests pass.
+- **2026-10-01:** Added the `JUMPS` warning (gap = no surface 10 m below the take-off/landing chord; required speed to the gap's far edge) and gold-level replay selection with a `REPLAY` note in the report. 116 offline tests pass.

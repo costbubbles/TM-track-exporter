@@ -16,10 +16,16 @@ namespace Tm2Ac.Pipeline;
 public sealed record ConversionSource(TmGame Game, long TmxId, string MapPath)
 {
     public string? GhostPath { get; init; }
+
+    /// <summary>Which replay was used and why (goes into the report).</summary>
+    public string? ReplayNote { get; init; }
     public TmxTrack? Track { get; init; }
     public byte[]? Screenshot { get; init; }
 
-    /// <summary>Downloads map, WR replay and first screenshot from TMX (all cached).</summary>
+    /// <summary>How many TMX replays are considered when looking for a gold-level run.</summary>
+    private const int ReplayCandidates = 100;
+
+    /// <summary>Downloads map, a gold-level replay (<see cref="PickGoldReplay"/>) and first screenshot from TMX (all cached).</summary>
     public static async Task<ConversionSource> FromTmxAsync(TmxClient client, TmGame game, long tmxId, long? replayId = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(client);
@@ -27,7 +33,23 @@ public sealed record ConversionSource(TmGame Game, long TmxId, string MapPath)
         var map = await client.DownloadMapAsync(game, tmxId, cancellationToken).ConfigureAwait(false);
 
         string? ghost = null;
-        if ((replayId ?? track.WrReplayId) is { } id)
+        string? note = null;
+        if (replayId is null)
+        {
+            var gold = TmMapReader.Read(map).GoldTimeMs;
+            var replays = await client.GetReplaysAsync(game, tmxId, ReplayCandidates, cancellationToken).ConfigureAwait(false);
+            if (PickGoldReplay(replays, gold) is { } pick)
+            {
+                replayId = pick.Id;
+                note = $"Replay {pick.Id} by {pick.Player} ({pick.TimeMs / 1000.0:0.000} s; gold {(gold is { } g ? $"{g / 1000.0:0.000} s" : "unknown")})";
+            }
+        }
+        else
+        {
+            note = $"Replay {replayId} (chosen by the user)";
+        }
+
+        if (replayId is { } id)
         {
             ghost = await client.DownloadReplayAsync(game, id, cancellationToken).ConfigureAwait(false);
         }
@@ -42,7 +64,24 @@ public sealed record ConversionSource(TmGame Game, long TmxId, string MapPath)
             // No screenshot: a generated preview is used.
         }
 
-        return new ConversionSource(game, tmxId, map) { GhostPath = ghost, Track = track, Screenshot = screenshot };
+        return new ConversionSource(game, tmxId, map) { GhostPath = ghost, ReplayNote = note, Track = track, Screenshot = screenshot };
+    }
+
+    /// <summary>
+    /// The replay closest to a gold-medal run: the fastest one that isn't faster than the gold time. World records often use
+    /// skips that don't follow the intended route (and the route drives layout, sectors and the minimap). When every replay
+    /// beats gold, the slowest is used; without a gold time, the fastest (TMX's WR).
+    /// </summary>
+    public static TmxReplay? PickGoldReplay(IReadOnlyList<TmxReplay> replays, int? goldTimeMs)
+    {
+        ArgumentNullException.ThrowIfNull(replays);
+        var valid = replays.Where(r => r.TimeMs > 0).ToList();
+        if (goldTimeMs is not { } gold)
+        {
+            return valid.MinBy(r => r.TimeMs);
+        }
+
+        return valid.Where(r => r.TimeMs >= gold).MinBy(r => r.TimeMs) ?? valid.MaxBy(r => r.TimeMs);
     }
 }
 
@@ -72,6 +111,11 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         progress?.Report("Reading map and replay");
         var map = TmMapReader.Read(source.MapPath);
         var ghost = source.GhostPath is null ? null : TryReadGhost(source.GhostPath, issues);
+        if (source.ReplayNote is { } replayNote)
+        {
+            issues.Add(IssueSeverity.Info, "REPLAY", "", replayNote);
+        }
+
         if (ghost is null)
         {
             issues.Add(IssueSeverity.Warn, "NO_REPLAY", "", "No replay available: layout and sectors are guessed from the map, and the minimap uses waypoints");
@@ -96,6 +140,10 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         progress?.Report($"Building geometry from {map.Blocks.Count} blocks");
         builder.Build(map, track, options);
         cancellationToken.ThrowIfCancellationRequested();
+        if (ghost is not null)
+        {
+            JumpDetector.Report(JumpDetector.Find(ghost, builder.SurfaceHeightBelow, options.Scale), issues);
+        }
         progress?.Report("Placing timing gates, grid and pits");
         var route = new RouteBuilder(builder, SpawnOf, issues);
         route.Build(map, ghost, track, options);

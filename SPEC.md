@@ -101,7 +101,9 @@ Rules:
 - `fields=` is required on search, and unknown fields return HTTP 400. Field sets differ per site.
 - At most 2 concurrent requests per host, with exponential backoff on 429/5xx.
 - Cache: map and replay files are immutable per ID, so they are cached forever. Search responses are cached for 10 minutes.
-- TMNF-X search results include `WRReplay.ReplayId`, so the default AI-line ghost needs no extra call.
+- The default replay is **gold-level**, not the WR (WRs often use skips off the intended route): from `api/replays` (up to
+  100), the fastest replay that isn't faster than the map's gold time (`CGameCtnChallenge.GoldTime`). If every replay beats
+  gold, the slowest is used; without a gold time, the fastest. `--replay` overrides. The choice is logged as a `REPLAY` issue.
 - Default browser filter: `primarytype=0` (Race). The parameter is single-valued. Circuits are found by tag `Multilap` (4),
   because TMNF-X multilap maps are listed as Race.
 - Metadata we keep: name, author(s), upload/update dates, tags, environment, mood, author time, awards,
@@ -355,6 +357,12 @@ There is no `analyze` command, no `--force` and no refusal.
 
 `conversion-report.json` still lists conversion issues (Info/Warn/Block) about the *conversion itself*, for example:
 - `NO_REPLAY` (layout and sectors guessed from the map)
+- `REPLAY` (Info: which replay was used and why)
+- `JUMPS` (Warn, never blocks): the replay flies over real gaps. A gap is a point of a ≥ 0.5 s flight with no drivable
+  surface within 10 m below the take-off → landing chord (crests over continuous road stay above the chord). The message
+  gives the hardest gap's length to its far edge and the launch speed it needs at the replay's launch angle
+  (projectile motion, g = 9.81, scaled lengths). Calibrated 2026-10-01: R1 ≈ 223 km/h, R6 ≈ 199, R4 ≈ 208, R5 impossible;
+  R2/R3 none.
 - `NO_START` / `NO_FINISH`
 - `CHECKPOINT_ORDER_GUESSED`
 - `PIT_PLATFORM_GENERATED`
