@@ -47,6 +47,12 @@ Notes:
 - Dummies exported by ksEditor sometimes carry a same-named child mesh (a visual marker box, `lod 0-0`). It isn't
   required: Sadamine's dummy-only KN5 has none.
 
+## Winding and LOD (checked in Phase 1)
+- **Front faces:** `cross(v1 − v0, v2 − v0)` points along the vertex normal. On Magione road physics meshes the count was
+  341,245 triangles to 1. Collision-only meshes (Sadamine) are mixed about 50/50, so physics is double-sided and doesn't care.
+- **`lodIn = lodOut = 0` means no LOD limit.** All visible meshes in `baby_park`, `drift` and `bugx_la_blocks` use 0-0.
+- `ksPerPixelAT` with `alphaTested=1` is used for decals with transparent backgrounds.
+
 ## Materials we'll emit
 Observed property sets (Magione):
 

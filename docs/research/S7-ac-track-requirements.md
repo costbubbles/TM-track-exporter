@@ -36,6 +36,15 @@ Z_OFFSET=444.422
 DRAWING_SIZE=10
 ```
 
+**map.ini semantics** (checked in Phase 1 against Magione, Burnout Paradise and 6 other tracks with `SCALE_FACTOR` ≠ 1):
+- `WIDTH`/`HEIGHT` = **map.png size in pixels**. For example Burnout is 2320×1436 and the PNG is 2320×1436.
+- `pixel = (world + OFFSET) / SCALE_FACTOR`. Offsets are in metres, and image down = +Z.
+  - Burnout's pit at (2156, −2313) maps to pixel (1793, 360).
+  - Magione: `X_OFFSET = −minX + MARGIN`.
+
+**Default surfaces:** AC ships `system/data/surfaces.ini` with `ROAD` (1.0), `GRASS` (0.6), `KERB` (0.92) and `SAND` (0.8). It has **no
+`WALL` entry**: digit-prefixed meshes with an undefined key (`1WALL0001`) are walls.
+
 ### `data/lighting.ini`
 ```ini
 [LIGHTING]

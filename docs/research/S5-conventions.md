@@ -39,6 +39,12 @@ Magione's `AC_PIT_*` dummies have row 2 = (−0.498, 0, −0.867), and the AI li
 - Block solids (see S2) are modelled in **block-local space 0..32 × 0..32** after applying the CPlugTree `Location`
   chain. Collision meshes need their parent tree transform too (raw coords were offset by (48, 40)).
 
+## Evidence on TM handedness (ghost steering, Phase 1)
+In the WR ghost of #924307, on-ground samples above 20 m/s with |steer| > 0.3 were checked: **78 of 87** have
+`steer < 0` together with `(v_prev × v_next).y > 0`, i.e. turning from +Z toward +X. The car's local +Z matches its velocity.
+If TM's negative steer means left (the usual TM input convention), then in TM world "left of +Z is +X", the same as AC.
+**Prediction: the TM→AC mapping is the identity (no mirroring).** This still needs confirming on a real map in Phase 4.
+
 ## Open: handedness
 Is TM's world left-handed relative to AC's? Mapping (x, y, z) → (x, y, z) directly may mirror the track. Plan:
 1. In Phase 1, build the synthetic L-shaped track. Confirm in game which way it turns relative to `AC_START_0` facing.

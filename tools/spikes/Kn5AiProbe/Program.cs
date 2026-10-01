@@ -2,6 +2,8 @@ using System.Text;
 var mode = args[0];
 if (mode == "kn5") Kn5(args[1], args.Length > 2 ? int.Parse(args[2]) : 99);
 if (mode == "ai") Ai(args[1]);
+if (mode == "wind") Winding.Run(args[1]);
+if (mode == "map") MapCheck.Run(args[1]);
 if (mode == "aitail") Extra.AiTail(args[1], float.Parse(args[2]), float.Parse(args[3]));
 
 static string Str(BinaryReader r) { var n = r.ReadInt32(); return Encoding.UTF8.GetString(r.ReadBytes(n)); }
@@ -95,5 +97,58 @@ static class Extra
         Console.WriteLine($"after extras pos={r.BaseStream.Position} len={r.BaseStream.Length}");
         var ints = new List<string>(); for (int i = 0; i < 12 && r.BaseStream.Position + 4 <= r.BaseStream.Length; i++) { var p = r.BaseStream.Position; var iv = r.ReadInt32(); r.BaseStream.Position = p; var fv = r.ReadSingle(); ints.Add($"{iv}/{fv:0.###}"); }
         Console.WriteLine("tail as int/float: " + string.Join("  ", ints));
+    }
+}
+
+static class Winding
+{
+    // For every renderable mesh: compare geometric face normal (v1-v0)x(v2-v0) with the average vertex normal.
+    public static void Run(string path)
+    {
+        using var r = new BinaryReader(File.OpenRead(path));
+        r.ReadBytes(6); var ver = r.ReadInt32(); if (ver > 5) r.ReadInt32();
+        var tc = r.ReadInt32(); for (int i = 0; i < tc; i++) { r.ReadInt32(); S(r); r.BaseStream.Seek(r.ReadInt32(), SeekOrigin.Current); }
+        var mc = r.ReadInt32(); for (int i = 0; i < mc; i++) { S(r); S(r); r.ReadByte(); r.ReadByte(); r.ReadInt32(); var pc = r.ReadInt32(); for (int p = 0; p < pc; p++) { S(r); r.ReadBytes(40); } var sc = r.ReadInt32(); for (int s = 0; s < sc; s++) { S(r); r.ReadInt32(); S(r); } }
+        long pos = 0, neg = 0; double vMin = double.MaxValue, vMax = double.MinValue;
+        Node(r, ref pos, ref neg, ref vMin, ref vMax);
+        Console.WriteLine($"triangles with face normal (ROAD/TARMAC/KERB/PIT physics meshes only) agreeing with vertex normals using (v1-v0)x(v2-v0): {pos}, disagreeing: {neg}");
+        Console.WriteLine($"uv.v range: {vMin:0.###}..{vMax:0.###}");
+    }
+    static string S(BinaryReader r) => System.Text.Encoding.UTF8.GetString(r.ReadBytes(r.ReadInt32()));
+    static void Node(BinaryReader r, ref long pos, ref long neg, ref double vMin, ref double vMax)
+    {
+        var cls = r.ReadInt32(); var nodeName = S(r); var children = r.ReadInt32(); r.ReadBoolean(); var isRoad = System.Text.RegularExpressions.Regex.IsMatch(nodeName, @"^\d+(ROAD|TARMAC|KERB|PIT)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        if (cls == 1) r.ReadBytes(64);
+        else
+        {
+            r.ReadBytes(3); var vc = r.ReadInt32();
+            var p = new System.Numerics.Vector3[vc]; var n = new System.Numerics.Vector3[vc];
+            for (int i = 0; i < vc; i++) { p[i] = new(r.ReadSingle(), r.ReadSingle(), r.ReadSingle()); n[i] = new(r.ReadSingle(), r.ReadSingle(), r.ReadSingle()); var u = r.ReadSingle(); var v = r.ReadSingle(); vMin = Math.Min(vMin, v); vMax = Math.Max(vMax, v); r.ReadBytes(12); }
+            var ic = r.ReadInt32(); var idx = new ushort[ic]; for (int i = 0; i < ic; i++) idx[i] = r.ReadUInt16();
+            r.ReadBytes(4 + 4 + 8 + 16); r.ReadBoolean();
+            for (int t = 0; t + 2 < ic; t += 3)
+            {
+                var a = p[idx[t]]; var b = p[idx[t + 1]]; var c = p[idx[t + 2]];
+                var face = System.Numerics.Vector3.Cross(b - a, c - a);
+                var vn = n[idx[t]] + n[idx[t + 1]] + n[idx[t + 2]];
+                var d = System.Numerics.Vector3.Dot(face, vn); if (isRoad && d > 1e-6) pos++; else if (isRoad && d < -1e-6) neg++;
+            }
+        }
+        for (int i = 0; i < children; i++) Node(r, ref pos, ref neg, ref vMin, ref vMax);
+    }
+}
+
+static class MapCheck
+{
+    public static void Run(string trackDir)
+    {
+        static (int w, int h) Png(string f) { var b = File.ReadAllBytes(f); return ((b[16] << 24) | (b[17] << 16) | (b[18] << 8) | b[19], (b[20] << 24) | (b[21] << 16) | (b[22] << 8) | b[23]); }
+        foreach (var f in new[] { "map.png", "ui/outline.png", "ui/preview.png" }) { var p = Path.Combine(trackDir, f); if (File.Exists(p)) Console.WriteLine($"{f}: {Png(p)}"); }
+        using var r = new BinaryReader(File.OpenRead(Path.Combine(trackDir, "ai", "fast_lane.ai")));
+        r.ReadInt32(); var n = r.ReadInt32(); r.ReadInt32(); r.ReadInt32();
+        float minX = float.MaxValue, maxX = float.MinValue, minZ = float.MaxValue, maxZ = float.MinValue;
+        for (int i = 0; i < n; i++) { var x = r.ReadSingle(); r.ReadSingle(); var z = r.ReadSingle(); r.ReadSingle(); r.ReadInt32(); minX = Math.Min(minX, x); maxX = Math.Max(maxX, x); minZ = Math.Min(minZ, z); maxZ = Math.Max(maxZ, z); }
+        Console.WriteLine($"AI line bounds: x {minX:0.##}..{maxX:0.##} (w {maxX - minX:0.##}), z {minZ:0.##}..{maxZ:0.##} (h {maxZ - minZ:0.##})");
+        Console.WriteLine(File.ReadAllText(Path.Combine(trackDir, "data", "map.ini")));
     }
 }

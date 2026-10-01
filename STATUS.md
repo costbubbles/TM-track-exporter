@@ -6,10 +6,10 @@ _Last updated: 2026-09-30_
 
 | | |
 |---|---|
-| **Phase** | 0 is ✅ complete (exit criteria met). Next is **Phase 1: "Hello AC" synthetic track** |
+| **Phase** | 1: "Hello AC". Code is done and the test track is installed. **Waiting on the user's in-game check** |
 | **Release** | none |
-| **Next up** | `Tm2Ac.Kn5` writer + reader with round-trip test, INI/UI writers, then the synthetic oval + L-shaped track to load in AC. The L-shape settles the S5 handedness question |
-| **Blockers** | none |
+| **Next up** | The user drives `tm2ac_test_lcircuit` and reports against the Phase 1 checklist below. Then Phase 2 (TMX client + TMNF parsing) |
+| **Blockers** | Phase 1 exit needs the in-game result |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
 ## Phase progress
@@ -17,7 +17,7 @@ _Last updated: 2026-09-30_
 | Phase | Status |
 |---|---|
 | 0 Foundation & spikes | ✅ done (S5 handedness is deferred to Phase 1 by design) |
-| 1 Hello AC (synthetic track) | ⬜ next |
+| 1 Hello AC (synthetic track) | 🟨 code done, track installed, awaiting in-game check |
 | 2 TMX client + TMNF parsing | ⬜ |
 | 3 TMNF asset extraction | ⬜ |
 | 4 Geometry → first TMNF track in AC | ⬜ |
@@ -72,6 +72,22 @@ _Last updated: 2026-09-30_
   time. It's the expected **Red** reference. More reference maps (simple circuit, A-to-B tech, dirt) will be added in Phase 2
   (`tests/reference-maps.md`).
 
+## Phase 1 in-game checklist (`Tm2Ac Test Circuit (L)`)
+
+Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-track`.
+
+- [ ] Track appears in Content Manager with name, preview (yellow L shape) and outline
+- [ ] Loads in AC with CSP, with no error or crash
+- [ ] Practice/hotlap: car spawns on the road facing the "▲ TM2AC" start decal and checkered line
+- [ ] **Blue "LEFT ▶" wall is on your left, red "◀ RIGHT" wall on your right, and arrows point the way you drive**
+- [ ] Text on the walls and on the road reads normally (not mirrored, not upside down)
+- [ ] Corner sequence from the start: **right, right, right, LEFT, right, right**
+- [ ] The road is visible from above (not see-through), and grass and walls render
+- [ ] The car drives on road, grass slows it down, and walls stop it
+- [ ] Lap time registers on crossing the line, and sector times show (3 sectors)
+- [ ] Minimap: the car dot moves the same way you drive
+- [ ] Race mode: cars line up on the grid behind the line. Pits: return to pits works
+
 ## Acceptance checklist (per release, per reference map)
 
 - [ ] Appears in Content Manager with correct name, preview and outline
@@ -96,3 +112,9 @@ _Last updated: 2026-09-30_
 - **2026-10-01:** Created the public repo https://github.com/costbubbles/TM-track-exporter and pushed `main`. CI first failed
   because `.gitignore`'s `*.Gbx` and `*.kn5` patterns also hid the `src/Tm2Ac.Gbx/` and `src/Tm2Ac.Kn5/` folders (Windows git is
   case-insensitive). Fixed with `!*/`, verified from a fresh clone, and CI is now green.
+- **2026-10-01:** Phase 1 code.
+  - Wrote the KN5 writer/reader, track-folder writer, geometry builders, Steam/AC detection and `tm2ac dev test-track`. 32 tests pass.
+  - Verified more formats against real tracks: triangle winding, `lod 0-0` = unlimited, and map.ini semantics (WIDTH = PNG pixels,
+    pixel = (world + offset) / scale). AC's default surfaces have no WALL.
+  - Ghost steering analysis predicts no TM→AC mirroring (S5).
+  - Installed `tm2ac_test_lcircuit` into AC. Waiting on the in-game check.

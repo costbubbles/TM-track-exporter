@@ -38,12 +38,18 @@ covered by Phase 1's L-shaped test by design.
 
 **Goal:** prove that our KN5 writer and folder writer produce a track AC loads, before any TM code exists.
 
-- [ ] `Tm2Ac.Kn5`: writer + minimal reader, with a round-trip unit test
-- [ ] `Tm2Ac.AcTrack`: writers for surfaces.ini, map.ini, ui_track.json, lighting.ini, cameras.ini, ext_config.ini
-- [ ] Generate a test track in code: a 500 m flat oval with a ROAD collision mesh, a GRASS ground, a WALL barrier and one textured
-      material, plus AC_START/AC_PIT ×4, AC_TIME_0, AC_HOTLAP_START_0, map.png, outline.png and preview
-- [ ] An L-shaped asymmetric variant to verify handedness and dummy orientation (S5)
-- [ ] Manual check: the track shows in CM, loads in AC with CSP, spawns face forward, laps time, and pits work
+- [x] `Tm2Ac.Kn5`: writer + minimal reader, with round-trip, byte-identical rewrite, header and real-file tests
+- [x] `Tm2Ac.AcTrack`: writers for models.ini, surfaces.ini (incl. CSP extended), map.ini + map.png, outline/preview,
+      lighting/groove/cameras.ini, ui_track.json, README and conversion-report.json. Refuses to overwrite folders it did not create.
+      ext_config.ini is deferred to Phase 6 because nothing needs it yet
+- [x] `Tm2Ac.Geometry`: `AcAxes` conventions, `MeshData` with a 65k splitter, `Centerline` (rounded polygons), ribbon/wall/ground builders
+- [x] `Tm2Ac.Core`: Steam library + AC/CSP detection
+- [x] CLI: `tm2ac dev test-track [--out DIR] [--ac-path DIR]`
+- [x] Synthetic track: the oval and L-shape are **merged into one asymmetric L-shaped circuit**, `tm2ac_test_lcircuit` (1,010 m).
+      It has ROAD/GRASS/WALL collision, a blue LEFT and red RIGHT wall, a "TM2AC ▲" start decal, 8 grid/pit slots, 3 timing gates and a hotlap start
+- [x] Installed into AC (`content/tracks/tm2ac_test_lcircuit`)
+- [ ] **Manual check by the user** (checklist in STATUS.md): shows in CM, loads with CSP, spawns face forward, walls on the
+      correct sides, text and arrows readable, corner sequence R-R-R-L-R-R, laps and sectors time, pits work
 
 **Exit:** a drivable synthetic track. S5 conventions are recorded in SPEC §6/§7.4.
 
