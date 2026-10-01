@@ -159,11 +159,15 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
 
 ## Phase 7: Compatibility analysis → **v0.1 release (CLI)**
 
-- [ ] `data/block-flags.tmnf.json`: loops, wallrides, boosters and special blocks
-- [ ] Ghost-based heuristics: upside-down time, airtime/gaps vs scale
-- [ ] Rating engine (Green/Yellow/Red) + `tm2ac analyze`, with conversion refusing Red unless `--force`
-- [ ] README (install, usage, legal notice), and a GitHub release with a self-contained win-x64 CLI build
-- [ ] Run the full acceptance checklist on all reference maps
+- [x] `data/block-flags.tmnf.json`: loop and wallride features (used when there's no replay), plus fallbacks
+- [x] Ghost heuristics: upside-down time, wall-driving time, longest flight, airborne %, booster contact.
+      Thresholds calibrated on R1–R7 (R5 and R7 Red, R4 Yellow, the others Green)
+- [x] Rating engine (Green/Yellow/Red from issue severities) + `tm2ac analyze` (TMX only, no TMNF needed).
+      `convert` refuses Red without `--force` (exit code 2), and the rating and ghost stats go into conversion-report.json
+- [x] README (install, usage, compatibility, legal notice). `dotnet publish src/Tm2Ac.Cli -c Release -r win-x64` gives a single
+      45 MB exe, and CI uploads it as an artifact
+- [ ] Run the full acceptance checklist on the reference maps (**queued**: needs the user in game)
+- [ ] Tag v0.1.0 and publish the GitHub release (**waiting for the user's approval** after the acceptance checks)
 
 **Exit:** v0.1 tagged.
 

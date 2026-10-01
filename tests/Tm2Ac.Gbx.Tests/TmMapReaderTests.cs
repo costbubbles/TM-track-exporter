@@ -17,7 +17,13 @@ public class BlockFlagTableTests
     public void ClassifiesTmnfWaypoints(string block, TmWaypoint expected) => Assert.Equal(expected, BlockFlagTable.Tmnf.Waypoint(block));
 
     [Fact]
-    public void EmbeddedTableHasAllEighteenWaypointBlocks() => Assert.Equal(18, BlockFlagTable.Tmnf.Count - 4); // + 4 fallback-only entries
+    public void EmbeddedTableHasAllEighteenWaypointBlocks() => Assert.Equal(18, BlockFlagTable.Tmnf.WaypointCount);
+
+    [Theory]
+    [InlineData("StadiumLoopLeft", "Loop")]
+    [InlineData("StadiumPlatformWall2", "Wallride")]
+    [InlineData("StadiumRoadTiltStraight", null)]
+    public void FlagsLoopsAndWallrides(string block, string? feature) => Assert.Equal(feature, BlockFlagTable.Tmnf.Feature(block));
 
     [Fact]
     public void HasFallbacksForUnparseableBlocks() => Assert.Equal("StadiumRoadMainTurboRouletteLeft", BlockFlagTable.Tmnf.Fallback("StadiumRoadMainTurboLeft"));

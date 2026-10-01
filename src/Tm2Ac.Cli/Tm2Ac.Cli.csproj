@@ -5,6 +5,23 @@
     <AssemblyName>tm2ac</AssemblyName>
   </PropertyGroup>
 
+  <!-- Release build: dotnet publish src/Tm2Ac.Cli -c Release -r win-x64 (single self-contained exe). -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <!-- Keep the release folder to the exe: SkiaSharp alone ships a ~96 MB native .pdb. -->
+  <Target Name="RemoveNativePdbsFromPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <PublishedPdbs Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(PublishedPdbs)" />
+  </Target>
+
   <ItemGroup>
     <ProjectReference Include="..\Tm2Ac.Core\Tm2Ac.Core.csproj" />
     <ProjectReference Include="..\Tm2Ac.Tmx\Tm2Ac.Tmx.csproj" />

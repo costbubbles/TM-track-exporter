@@ -14,6 +14,9 @@ public sealed record ConversionOptions
     /// <summary>Invisible walls at the edge of the TM map area so cars can't drive off the world.</summary>
     public bool EdgeWalls { get; init; } = true;
 
+    /// <summary>Convert even when the map is rated Red (SPEC §8).</summary>
+    public bool Force { get; init; }
+
     /// <summary>Force a layout instead of detecting it from the map (null = auto).</summary>
     public RaceLayout? Layout { get; init; }
 }

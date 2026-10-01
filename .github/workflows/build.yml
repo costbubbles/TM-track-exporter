@@ -16,3 +16,10 @@ jobs:
       - run: dotnet restore
       - run: dotnet build --no-restore -c Release
       - run: dotnet test --no-build -c Release --filter-not-trait "Category=Network" --filter-not-trait "Category=Assets"
+      - name: Publish CLI (single-file win-x64)
+        run: dotnet publish src/Tm2Ac.Cli -c Release -r win-x64 -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tm2ac-win-x64
+          path: publish/tm2ac.exe
+          retention-days: 30

@@ -6,9 +6,9 @@ _Last updated: 2026-09-30_
 
 | | |
 |---|---|
-| **Phase** | 6 code done (manual check queued). Next is **Phase 7: compatibility analysis → v0.1** |
+| **Phase** | 7 code done. **v0.1 is ready apart from the user's in-game acceptance** (queued). Next is Phase 8: WPF desktop app |
 | **Release** | none |
-| **Next up** | Compatibility rating (block flags + ghost heuristics), `tm2ac analyze`, refuse Red without --force, README, v0.1 release build |
+| **Next up** | Phase 8 desktop app (browse TMX, analyze, convert & install, library, settings) |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -23,8 +23,8 @@ _Last updated: 2026-09-30_
 | 4 Geometry → first TMNF track in AC | ✅ code done, 🟨 in-game check queued |
 | 5 Route, timing, spawns, pits | ✅ code done, 🟨 in-game check queued |
 | 6 AI line, UI assets, CSP config | ✅ code done, 🟨 in-game check queued |
-| 7 Compatibility → v0.1 (CLI) | 🟨 next |
-| 8 Desktop app → v0.2 | ⬜ |
+| 7 Compatibility → v0.1 (CLI) | ✅ code done, 🟨 acceptance + release tag waiting for the user |
+| 8 Desktop app → v0.2 | 🟨 next |
 | 9 TM2020 → v0.3 | ⬜ |
 
 ## Research spikes
@@ -95,6 +95,9 @@ If something is badly wrong, roll back with git: each phase is its own commit.
 4. **Phase 6 AI (R3 Rockridge):** add AI opponents in Race/Practice. They should follow the line and finish laps, though they may be
    cautious or crash at jumps. Content Manager's track page should show the TMX screenshot preview, the outline, and the author/url.
 
+5. **v0.1 release decision:** if 1–4 look good, approve tagging `v0.1.0` and publishing a GitHub release with `tm2ac.exe`
+   (the CI build artifact can be tried first). Releases are public, so this waits for you.
+
 ## Phase 1 in-game checklist (`Tm2Ac Test Circuit (L)`): ✅ all passed 2026-10-01
 
 Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-track`.
@@ -163,3 +166,7 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - fast_lane.ai writer (no grid, per 19 working tracks) and an AI line from the ghost lap with AC-grip speed targets.
   - Indexed surface query, `--zip` export.
   - R1 and R3 reinstalled with AI. 121 tests pass.
+- **2026-10-01:** Phase 7.
+  - Compatibility analyzer (ghost metrics + block features) and `tm2ac analyze`. `convert` refuses Red without `--force`.
+  - README, single-file publish config, CI artifact.
+  - 130 tests pass.

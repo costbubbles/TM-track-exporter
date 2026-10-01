@@ -48,6 +48,13 @@ public sealed record ConversionSource(TmGame Game, long TmxId, string MapPath)
 
 public sealed record ConversionResult(string TrackId, string Directory, IReadOnlyList<ConversionIssue> Issues)
 {
+    public CompatibilityRating Rating { get; init; }
+
+    /// <summary>True when the map was rated Red and not converted (use <see cref="ConversionOptions.Force"/>).</summary>
+    public bool Refused { get; init; }
+
+    public GhostStats? GhostStats { get; init; }
+
     public int Blocks { get; init; }
     public int VisualTriangles { get; init; }
     public int CollisionTriangles { get; init; }
@@ -76,6 +83,15 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
 
         var name = source.Track?.Name is { Length: > 0 } tmxName ? TmText.StripFormatting(tmxName) : map.Name;
         var trackId = TrackIds.Create(source.Game, source.TmxId, name);
+        var directory = Path.Combine(tracksDirectory, trackId);
+
+        // Cheap checks first: a Red map is refused before any geometry is built.
+        var stats = CompatibilityAnalyzer.Analyze(map, ghost, issues);
+        if (!options.Force && CompatibilityAnalyzer.Rate(issues.ToList()) == CompatibilityRating.Red)
+        {
+            return new ConversionResult(trackId, directory, issues.ToList()) { Rating = CompatibilityRating.Red, Refused = true, GhostStats = stats, Elapsed = stopwatch.Elapsed };
+        }
+
         var builder = new TmnfSceneBuilder(library, issues);
 
         var track = new AcTrackModel
@@ -103,11 +119,28 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
             Tags = [.. track.Ui.Tags.Where(t => t is not ("circuit" or "a2b")), circuit ? "circuit" : "a2b"],
         };
 
-        var directory = Path.Combine(tracksDirectory, trackId);
         var issueList = issues.ToList();
-        AcTrackWriter.Write(track, directory, Report(source, map, options, issueList, builder));
+        var rating = CompatibilityAnalyzer.Rate(issueList);
+        var report = Report(source, map, options, issueList, builder);
+        report["compatibility"] = rating.ToString();
+        if (stats is not null)
+        {
+            report["ghostStats"] = new JsonObject
+            {
+                ["raceTimeMs"] = stats.RaceTimeMs,
+                ["upsideDownMs"] = stats.UpsideDownMs,
+                ["wallDrivingMs"] = stats.WallDrivingMs,
+                ["longestAirMs"] = stats.LongestAirMs,
+                ["airbornePercent"] = stats.AirbornePercent,
+                ["boosterContactMs"] = stats.BoosterContactMs,
+            };
+        }
+
+        AcTrackWriter.Write(track, directory, report);
         return new ConversionResult(trackId, directory, issueList)
         {
+            Rating = rating,
+            GhostStats = stats,
             Blocks = builder.PlacedBlocks,
             VisualTriangles = builder.VisualTriangles,
             CollisionTriangles = builder.CollisionTriangles,
