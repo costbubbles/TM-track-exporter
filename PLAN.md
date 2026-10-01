@@ -137,7 +137,7 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
 
 ---
 
-## Phase 6: AI line, UI assets, CSP config
+## Phase 6: AI line, UI assets, CSP config (AI line later dropped, 2026-10-01)
 
 - [x] fast_lane.ai v7 writer + reader with round-trip test. **No spatial grid (flag 0)**, as 19 working community tracks do (S6)
 - [x] AI path from the ghost:
@@ -145,13 +145,13 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
   - Resampled at 1.5 m, smoothed, and snapped to the collision surface through an indexed height query.
   - Speeds from curvature (μ 1.4) plus 10 m/s² braking and 6 m/s² acceleration passes, giving gas and brake hints.
   - AI_LINE_AIRBORNE warning when more than 10% has no ground.
-- [ ] Centerline fallback from the route graph (maps without a replay currently get no AI line, plus a NO_REPLAY_FOR_AI warning)
-- [ ] Side distances by raycasting walls (constant 8 m × scale for now)
+- [x] ~~Centerline fallback~~ **AI line dropped** by user decision (2026-10-01). The builder and writer were removed; see SPEC §7.5
+- [x] ~~Side distances~~ dropped with the AI line
 - [x] Outline, map and preview generation (map from the ghost lap, preview from the TMX screenshot)
 - [x] Full `ui_track.json` from TMX metadata (author, url, year, tags, run direction)
 - [ ] `ext_config.ini`: **deferred**. Nothing needs it yet: extended physics is set in surfaces.ini, and AC sets time of day per session
 - [x] `conversion-report.json` + `README_TM2AC.txt` in the output, with `--zip` for a CM-installable archive
-- [ ] Manual check: the AI completes laps on the circuit reference map, and the CM track page looks complete (**queued**)
+- [ ] Manual check: the CM track page looks complete (**queued**). The AI part was dropped
 
 **Exit:** all SPEC §7 features present for TMNF.
 

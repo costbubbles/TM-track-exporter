@@ -43,7 +43,7 @@ The track then shows up in Content Manager and AC as e.g. `tmnf_18451_always_be_
 | Blocks (road, platforms, decoration) | Visual meshes with the original DDS textures (KN5) |
 | Physics surfaces (asphalt, dirt, grass, ice-like, ...) | `surfaces.ini` + hidden collision meshes; steep surfaces become walls |
 | Start / checkpoints / finish | AC timing gates: start/finish + sectors for lap races, A-to-B gates for point-to-point |
-| World-record replay | AI line (`fast_lane.ai`) with recalculated speeds, minimap, hotlap start |
+| World-record replay | Track layout (circuit vs A-to-B), sector order, minimap, hotlap start, compatibility rating |
 | TMX metadata and screenshot | `ui_track.json`, preview and outline for Content Manager |
 
 ### Compatibility rating

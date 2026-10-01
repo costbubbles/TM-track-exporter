@@ -43,7 +43,7 @@ src/
   Tm2Ac.Assets/      TM pak filesystem (hashed names, recursive refs), block/material/collision extraction (on demand)
   Tm2Ac.Geometry/    Placement transforms, scaling, mesh merge/split, physics mesh build, surface mapping
   Tm2Ac.Kn5/         KN5 writer (+ minimal reader for round-trip tests)
-  Tm2Ac.AcTrack/     AC track folder writer: inis, dummies, fast_lane.ai, map/ui, ext_config
+  Tm2Ac.AcTrack/     AC track folder writer: inis, dummies, map/ui (no AI line: SPEC §7.5)
   Tm2Ac.Pipeline/    TM→AC conversion: block placement, surface map, material translation, scene builder, converter
   Tm2Ac.Cli/         `tm2ac` command-line entry point
   Tm2Ac.App/         WPF desktop app

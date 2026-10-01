@@ -81,7 +81,7 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         var ghost = source.GhostPath is null ? null : TryReadGhost(source.GhostPath, issues);
         if (ghost is null)
         {
-            issues.Add(IssueSeverity.Warn, "NO_REPLAY_FOR_AI", "", "No replay available: map and AI line fall back to waypoints");
+            issues.Add(IssueSeverity.Warn, "NO_REPLAY", "", "No replay available: layout and sectors are guessed from the map, and the minimap uses waypoints");
         }
 
         var name = source.Track?.Name is { Length: > 0 } tmxName ? TmText.StripFormatting(tmxName) : map.Name;
@@ -115,11 +115,6 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         var route = new RouteBuilder(builder, SpawnOf, issues);
         route.Build(map, ghost, track, options);
         var circuit = route.Layout == RaceLayout.Circuit;
-        if (ghost is not null)
-        {
-            progress?.Report("Building the AI line");
-            track.AiLine = AiLineBuilder.Build(ghost, route.Layout, route.LapLineTimes, builder, issues);
-        }
 
         track.MapPath = new Centerline(MapPath(map, ghost, builder, circuit), closed: circuit);
         track.Ui = track.Ui with

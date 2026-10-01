@@ -152,14 +152,35 @@ public sealed class TmnfBlockExtractor(TmnfPakFileSystem fs)
         }
     }
 
+    /// <summary>
+    /// Collects every collision surface in the solid's tree. Most blocks keep it on the root tree, but some (e.g. the
+    /// start/finish line, RoadGlass) attach it to child trees, so the whole tree is walked with accumulated transforms.
+    /// </summary>
     private void AddCollision(ExtractedVariant variant, CPlugSolid solid, List<string> warnings)
     {
-        if (solid.Tree is not CPlugTree root || root.Surface is not CPlugSurface surface || surface.Geom?.Surf is not CPlugSurface.Mesh mesh)
+        if (solid.Tree is not CPlugTree root)
         {
             return;
         }
 
-        var location = root.Location ?? Iso4.Identity;
+        var seen = new HashSet<CPlugSurface>(ReferenceEqualityComparer.Instance);
+        IEnumerable<(CPlugTree Tree, Iso4 Location)> trees = [(root, root.Location ?? Iso4.Identity), .. solid.GetAllChildrenWithLocation(lod: 0)];
+        foreach (var (tree, location) in trees)
+        {
+            if (Safe(() => tree.Surface as CPlugSurface, warnings, "collision surface") is { } surface && seen.Add(surface))
+            {
+                AddSurface(variant, surface, location, warnings);
+            }
+        }
+    }
+
+    private void AddSurface(ExtractedVariant variant, CPlugSurface surface, Iso4 location, List<string> warnings)
+    {
+        if (surface.Geom?.Surf is not CPlugSurface.Mesh mesh)
+        {
+            return;
+        }
+
         var surfaceIds = (surface.Materials ?? []).Select(m =>
         {
             var material = Safe(() => m.Material, warnings, "collision material");

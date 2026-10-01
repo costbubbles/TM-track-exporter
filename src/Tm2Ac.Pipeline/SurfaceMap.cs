@@ -27,6 +27,9 @@ public sealed class SurfaceMap
 
     public static SurfaceMap Tmnf { get; } = Load("surface-map.tmnf.json");
 
+    /// <summary>Faces with normal.y below −this are not collidable (see <see cref="Classify"/>).</summary>
+    public const float DownwardFaceY = 0.2f;
+
     public float WallSlopeDegrees { get; }
     public string UnknownSurface { get; }
 
@@ -57,9 +60,15 @@ public sealed class SurfaceMap
             return null;
         }
 
-        // Steep or downward-facing faces are walls.
+        // Downward-facing faces (box bottoms resting on the road, undersides of rounded barriers) are dropped: AC resolves
+        // contacts along the face normal, so they push cars down through the road. Steep faces become walls.
         var n = faceNormal.LengthSquared() > 0 ? Vector3.Normalize(faceNormal) : Vector3.UnitY;
-        return MathF.Abs(n.Y) < _wallCos || n.Y < 0 ? SurfaceKeys.Wall : key;
+        if (n.Y < -DownwardFaceY)
+        {
+            return null;
+        }
+
+        return n.Y < _wallCos ? SurfaceKeys.Wall : key;
     }
 
     public static SurfaceMap Parse(string json) => new(JsonSerializer.Deserialize<FileDto>(json, Json) ?? throw new InvalidDataException("Empty surface map."));

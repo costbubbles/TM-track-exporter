@@ -26,7 +26,7 @@ confirm (see PLAN.md). When a spike disproves something here, update this file.
 ### Release targets
 | Version | Scope |
 |---|---|
-| v0.1 (MVP) | TMNF **Stadium** maps, end to end, via CLI. Includes all §7 track features. |
+| v0.1 (MVP) | TMNF **Stadium** maps, end to end, via CLI. All §7 track features except the AI line (dropped). |
 | v0.2 | WPF GUI: TMX browser, compatibility view, conversion options, library of installed tracks. |
 | v0.3 | Trackmania 2020 maps (blocks + items + embedded custom items). |
 | v0.4 | TMUF non-Stadium environments, CSP Lua gameplay effects (boosters), polish. |
@@ -293,21 +293,11 @@ content/tracks/<trackId>/
   Textures are embedded as DDS. TM DDS is passed through as-is where AC accepts it.
 - Ground: a large ground plane (GRASS, or the TM environment's terrain) covering the bounds plus a 200 m margin.
 
-### 7.5 AI line (`ai/fast_lane.ai`)
-- Binary fast_lane.ai, version 7. The layout is verified in [S6](docs/research/S6-fast-lane-ai.md). It holds:
-  - A header: version, count, lapTime, sampleCount.
-  - Points: position, cumulative length and id.
-  - 18 floats of extra data per point: speed, gas, brake, radius, side distances, normal, forward and more.
-  - A trailing spatial grid. Whether AC accepts the file without the grid is **[VERIFY]** in Phase 6.
-- Point spacing is about 1.4 m, as in Kunos files.
-- For TM2020, TMX rarely has replays, so the default is **centerline** unless the user supplies a local ghost.
-- Path source:
-  1. **replay**: sample the ghost at even 1–2 m spacing, smooth it, and project it onto the collision surface.
-  2. **centerline**: the route-graph centerline through ordered blocks.
-  3. **none**: no AI line, plus a warning.
-- Speeds are recomputed for AC from curvature and an assumed lateral grip (configurable) rather than copied from TM.
-  Side distances are measured by raycasting against WALL collision, falling back to road width.
-- For circuits the line is closed. For A-to-B it is open, from the start gate to the finish gate.
+### 7.5 AI line: dropped (decision 2026-10-01)
+No `ai/fast_lane.ai` is generated. Very few Trackmania maps can be driven conventionally from start to finish in AC, let
+alone by AI, so an AI line isn't worth its cost (user decision after the first in-game checks). The replay is still used for
+layout detection, checkpoint order (sectors), the minimap path and the compatibility rating. The format research stays in
+[S6](docs/research/S6-fast-lane-ai.md) in case this is revisited.
 
 ### 7.6 UI and map files
 - `ui_track.json` fields:

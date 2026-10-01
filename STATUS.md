@@ -71,6 +71,9 @@ _Last updated: 2026-09-30_
 | 2026-10-01 | TM `Rubber` (raised kerbs, inflatables) maps to AC `KERB` (friction 0.92, kerb rumble) |
 | 2026-10-01 | All AC_* dummies snap to the collision surface (TM start pads are raised) |
 | 2026-10-01 | TM "VDep" vertex-tinted grass fringe is not converted |
+| 2026-10-01 | **No AI line.** The user decided TM maps rarely drive conventionally in AC; the replay is still used for timing, layout and rating |
+| 2026-10-01 | Collision is read from every tree in a solid, not just the root |
+| 2026-10-01 | Collision faces with normal.y < -0.2 are dropped (they pushed cars through the road) |
 
 ## Open questions
 
@@ -98,6 +101,14 @@ R1/R3 reinstalled for round 2.
 
 R1/R3 reinstalled for round 3.
 
+**Round 3 feedback (2026-10-01):**
+- Rockridge spawn/pit bugged → the start/finish block's collision lives on child trees, which weren't read. **80 block variants had no collision. Now 0.**
+- Easy to glitch under the map at rounded barriers, and the start pad was still broken → downward-facing collision faces (box bottoms
+  resting on the road, undersides of barriers) pushed cars down. **Now dropped.**
+- **Decision:** no AI line (TM maps rarely drive conventionally in AC). Timing stays.
+
+R1/R3 reinstalled for round 4.
+
 Installed in AC on 2026-10-01: **`tmnf_18451_always_be_mine`** (R1, A to B) and **`tmnf_1531338_rockridge`** (R3, 2-lap circuit).
 If something is badly wrong, roll back with git: each phase is its own commit.
 
@@ -110,8 +121,7 @@ If something is badly wrong, roll back with git: each phase is its own commit.
    - R3 in Hotlap/Practice: laps count at the start/finish line, and 4 sector splits show.
    - Grid/pits: Race mode lines cars up behind the start, and "return to pits" works.
 3. **Performance:** load time and FPS on R3 (1.1M visual triangles). Note if it's too heavy.
-4. **Phase 6 AI (R3 Rockridge):** add AI opponents in Race/Practice. They should follow the line and finish laps, though they may be
-   cautious or crash at jumps. Content Manager's track page should show the TMX screenshot preview, the outline, and the author/url.
+4. **Content Manager page:** both tracks show the TMX screenshot preview, outline and author/url. (The AI check was dropped.)
 
 5. **v0.1 release decision:** if 1–4 look good, approve tagging `v0.1.0` and publishing a GitHub release with `tm2ac.exe`
    (the CI build artifact can be tried first). Releases are public, so this waits for you.
@@ -190,3 +200,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - 130 tests pass.
 - **2026-10-01:** In-game check round 1 found swapped road/kerb textures, caused by the TM V axis. Fixed the UV flip, mapped Rubber to KERB, and reinstalled R1/R3. Also landed the Phase 8 groundwork (AppSettings, InstalledTracks, converter progress/cancellation). 132 tests pass.
 - **2026-10-01:** In-game round 2 fixes: grass fringe dropped and dummies snapped to the surface. R1/R3 reinstalled. 134 tests pass.
+- **2026-10-01:** In-game round 3 fixes: child-tree collision (80 → 0 variants missing), downward faces dropped, AI line removed, re-converting cleans the old folder. R1/R3 reinstalled. 135 tests pass.

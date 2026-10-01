@@ -83,10 +83,12 @@ public class SurfaceMapTests
     public void DropsNonCollidableSurfaces(string tm) => Assert.Null(Map.Classify(tm, Vector3.UnitY, out _));
 
     [Fact]
-    public void SteepAndDownwardFacesBecomeWalls()
+    public void SteepFacesBecomeWallsAndDownwardFacesAreDropped()
     {
         Assert.Equal(SurfaceKeys.Wall, Map.Classify("Asphalt", new Vector3(1, 0.2f, 0), out _));
-        Assert.Equal(SurfaceKeys.Wall, Map.Classify("Asphalt", -Vector3.UnitY, out _));
+        Assert.Equal(SurfaceKeys.Wall, Map.Classify("Rubber", new Vector3(1, -0.1f, 0), out _)); // near-vertical barrier face
+        Assert.Null(Map.Classify("Asphalt", -Vector3.UnitY, out _));                             // box bottom on the road
+        Assert.Null(Map.Classify("Rubber", Vector3.Normalize(new Vector3(1, -0.7f, 0)), out _)); // underside of a rounded barrier
         Assert.Equal("ROAD", Map.Classify("Asphalt", Vector3.Normalize(new Vector3(1, 1, 0)), out _)); // 45° ramp
     }
 
@@ -185,6 +187,27 @@ public sealed class TmnfAssetTests : IDisposable
         Assert.SkipWhen(_library is null, "Needs a local TMNF install.");
         var road = _library.GetVariant("StadiumRoadMain", isGround: true, variant: 0)!.Parts.Single(p => p.MaterialPath.EndsWith("StadiumRoad.Material.Gbx", StringComparison.OrdinalIgnoreCase));
         Assert.All(road.Mesh.Uvs, uv => Assert.InRange(uv.Y, 0.3f, 1.01f));
+    }
+
+    [Theory]
+    [InlineData("StadiumRoadMainStartFinishLine")] // collision on child trees, not the root
+    [InlineData("StadiumControlRoadGlass")]
+    public void FindsCollisionOnChildTrees(string block)
+    {
+        Assert.SkipWhen(_library is null, "Needs a local TMNF install.");
+        var variant = _library.GetVariant(block, isGround: true, variant: 0)!;
+        Assert.True(variant.IsGround);
+        Assert.Contains("Asphalt", variant.Collision.Keys);
+    }
+
+    [Fact]
+    public void EveryVariantWithVisualsHasCollision()
+    {
+        Assert.SkipWhen(_library is null, "Needs a local TMNF install.");
+        var missing = _library.BlockNames
+            .SelectMany(n => _library.Get(n).Variants.Where(v => v.Parts.Count > 0 && v.Collision.Count == 0).Select(v => $"{n}:{(v.IsGround ? "G" : "A")}{v.Index}"))
+            .ToList();
+        Assert.Empty(missing);
     }
 
     [Fact]
@@ -349,42 +372,6 @@ public sealed class RouteTests : IDisposable
     }
 }
 
-public class AiLineMathTests
-{
-    [Fact]
-    public void ResamplesAtEvenSpacing()
-    {
-        var points = AiLineBuilder.Resample([Vector3.Zero, new Vector3(0, 0, 10), new Vector3(10, 0, 10)], 1.5f);
-
-        Assert.Equal(new Vector3(0, 0, 0), points[0]);
-        for (var i = 1; i < points.Count; i++)
-        {
-            Assert.InRange(Vector3.Distance(points[i - 1], points[i]), 1.0f, 1.5001f); // spaced by arc length; the chord across the corner is shorter
-        }
-
-        Assert.Equal(14, points.Count); // 20 m / 1.5 m + start
-    }
-
-    [Fact]
-    public void SpeedDropsIntoCornersAndBrakesBeforeThem()
-    {
-        // 450 m straight, then a tight 20 m radius corner.
-        var straight = Enumerable.Range(0, 300).Select(i => new Vector3(0, 0, i * 1.5f));
-        var corner = Enumerable.Range(1, 30).Select(i =>
-        {
-            var a = i / 30f * MathF.PI / 2;
-            return new Vector3(-20 + (20 * MathF.Cos(a)), 0, 448.5f + (20 * MathF.Sin(a)));
-        });
-        var ai = AiLineBuilder.Annotate([.. straight, .. corner], closed: false, scale: 1);
-
-        var cornerSpeed = ai[315].Speed;
-        Assert.InRange(cornerSpeed, 14, 20);                                   // sqrt(1.4 * 9.81 * 20) ≈ 16.6 m/s
-        Assert.True(ai[60].Speed > cornerSpeed * 3);                            // much faster on the straight
-        Assert.Equal(1f, ai[20].Gas);                                          // flat out early on the straight
-        Assert.Contains(ai.Skip(200).Take(100), p => p.Brake == 1f);           // braking in the run-up to the corner
-    }
-}
-
 public class CompatibilityRatingTests
 {
     [Fact]
@@ -466,5 +453,22 @@ public sealed class SpawnHeightTests : IDisposable
         var visual = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, result.TrackId + ".kn5"));
         var start = visual.Root.Children.OfType<Kn5.Kn5DummyNode>().Single(d => d.Name == "AC_START_0").Transform.Translation;
         Assert.Equal(1.05f, start.Y, 2);
+    }
+
+    [Fact]
+    public async Task RockridgeSpawnSitsOnTheStartFinishRoad()
+    {
+        // R3 starts on a ground StadiumRoadMainStartFinishLine whose collision lives on child trees; the road is at TM 9.34 (AC 0.34).
+        var tmnf = OperatingSystem.IsWindows() ? TrackmaniaInstalls.FindTmnf() : null;
+        Assert.SkipWhen(tmnf is null, "Needs a local TMNF install.");
+        using var library = TmnfBlockLibrary.Open(tmnf!);
+        using var client = TmxClient.CreateDefault();
+        var source = await ConversionSource.FromTmxAsync(client, TmGame.Tmnf, 1531338, cancellationToken: TestContext.Current.CancellationToken);
+        var result = new TmnfConverter(library).Convert(source, new ConversionOptions(), _out, cancellationToken: TestContext.Current.CancellationToken);
+
+        var visual = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, result.TrackId + ".kn5"));
+        var start = visual.Root.Children.OfType<Kn5.Kn5DummyNode>().Single(d => d.Name == "AC_START_0").Transform.Translation;
+        Assert.Equal(0.39f, start.Y, 2);
+        Assert.False(Directory.Exists(Path.Combine(result.Directory, "ai")));
     }
 }

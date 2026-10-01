@@ -24,6 +24,12 @@ public static class AcTrackWriter
         ArgumentNullException.ThrowIfNull(track);
         EnsureWritable(trackDirectory);
 
+        // Re-converting: start from an empty folder so files from an older conversion (e.g. a removed ai/ folder) don't linger.
+        if (File.Exists(Path.Combine(trackDirectory, ReportFileName)))
+        {
+            Directory.Delete(trackDirectory, recursive: true);
+        }
+
         Directory.CreateDirectory(trackDirectory);
         var data = Directory.CreateDirectory(Path.Combine(trackDirectory, "data")).FullName;
         var ui = Directory.CreateDirectory(Path.Combine(trackDirectory, "ui")).FullName;
@@ -36,12 +42,6 @@ public static class AcTrackWriter
         LightingIni(track.Lighting).Save(Path.Combine(data, "lighting.ini"));
         GrooveIni().Save(Path.Combine(data, "groove.ini"));
         CamerasIni(track).Save(Path.Combine(data, "cameras.ini"));
-
-        if (track.AiLine is { Count: > 1 } aiLine)
-        {
-            var aiDirectory = Directory.CreateDirectory(Path.Combine(trackDirectory, "ai")).FullName;
-            FastLaneAi.Write(aiLine, Path.Combine(aiDirectory, "fast_lane.ai"));
-        }
 
         var layout = MapLayout.FromPath(track.MapPath.Points);
         layout.ToIni().Save(Path.Combine(data, "map.ini"));
