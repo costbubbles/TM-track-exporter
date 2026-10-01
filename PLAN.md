@@ -118,12 +118,20 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
 
 ## Phase 5: Route, timing, spawns & pits
 
-- [ ] Gate extraction from start, finish and CP blocks (position, width, forward)
-- [ ] Track type detection (circuit vs A-to-B) and `--layout` override
-- [ ] Checkpoint ordering: from the replay (via S4), else a route-graph walk, else none + warning
-- [ ] AC dummies: AC_TIME_n, AC_HOTLAP_START_0, AC_AB_START/FINISH
-- [ ] Spawn/pit placement on existing road (checked against collision), or a generated pit platform + apron
-- [ ] Manual check: circuit timing and sectors, A-to-B time attack, pits and grid
+- [x] Gates from start, finish and CP blocks: block centre plane, full 32 m cell width, height and direction from where the ghost crossed
+- [x] Track type detection: ghost checkpoint crossings classified by nearest waypoint. Circuit if the start/finish line is
+      crossed, else A to B. The map's lap flag is used without a ghost, and `ConversionOptions.Layout` can override
+- [x] Checkpoint order from the ghost, first lap only. Side-by-side CPs crossed within 1 s merge. Without a ghost there are no sectors (issue)
+- [x] AC dummies:
+  - Circuit: AC_TIME_0 line + AC_TIME_n sectors.
+  - A to B: AC_AB_START 2 m ahead of the spawn, and AC_AB_FINISH at the finish the ghost reached (MULTIPLE_FINISHES info).
+  - Hotlap start 4 s before the lap line (circuits).
+- [x] Grid/pits: staggered slots 8 m apart behind the spawn, validated with a collision height query. Otherwise a generated ROAD
+      platform behind the start block (PIT_PLATFORM_GENERATED)
+- [x] `ui_track.json` run direction (clockwise/anticlockwise from the lap path, or a2b)
+- [x] Tests: R1 A-to-B, R3 circuit sectors in order and grid behind the line, R6 circuit despite a nearby finish block
+- [ ] Manual check: circuit timing and sectors, A-to-B time attack, pits and grid (**queued**: R1 and R3 installed in AC)
+- [ ] Sectors on A-to-B tracks (AC support unverified, see SPEC §7.2)
 
 **Exit:** reference maps are timed correctly in AC hotlap and time-attack modes.
 

@@ -12,7 +12,7 @@ public sealed class AcTrackModel
     /// <summary>Folder name under content/tracks, also used for the visual KN5 file name.</summary>
     public required string Id { get; init; }
 
-    public required UiTrackInfo Ui { get; init; }
+    public required UiTrackInfo Ui { get; set; }
 
     public List<AcTexture> Textures { get; } = [];
     public List<AcMaterial> Materials { get; } = [];

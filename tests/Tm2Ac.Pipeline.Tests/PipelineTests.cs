@@ -268,3 +268,72 @@ public sealed class TmnfConverterTests : IDisposable
         Assert.Equal(-1f, start.Transform.M31, 3); // facing -X like the ghost
     }
 }
+
+[Trait("Category", "Assets")]
+[Trait("Category", "Network")]
+public sealed class RouteTests : IDisposable
+{
+    private readonly string _out = Path.Combine(Path.GetTempPath(), "tm2ac-route-" + Guid.NewGuid().ToString("N"));
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_out))
+        {
+            Directory.Delete(_out, recursive: true);
+        }
+    }
+
+    private async Task<(ConversionResult Result, List<Kn5.Kn5DummyNode> Dummies, System.Text.Json.Nodes.JsonNode Ui)> Convert(long id)
+    {
+        var tmnf = OperatingSystem.IsWindows() ? TrackmaniaInstalls.FindTmnf() : null;
+        Assert.SkipWhen(tmnf is null, "Needs a local TMNF install.");
+        using var library = TmnfBlockLibrary.Open(tmnf!);
+        using var client = TmxClient.CreateDefault();
+        var source = await ConversionSource.FromTmxAsync(client, TmGame.Tmnf, id, cancellationToken: TestContext.Current.CancellationToken);
+        var result = new TmnfConverter(library).Convert(source, new ConversionOptions { Pitboxes = 6 }, _out);
+        var visual = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, result.TrackId + ".kn5"));
+        var ui = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(Path.Combine(result.Directory, "ui", "ui_track.json")))!;
+        return (result, visual.Root.Children.OfType<Kn5.Kn5DummyNode>().ToList(), ui);
+    }
+
+    [Fact]
+    public async Task PointToPointMapGetsAbGatesAndGrid()
+    {
+        var (_, dummies, ui) = await Convert(18451);
+        var names = dummies.Select(d => d.Name).ToHashSet();
+
+        Assert.Contains("AC_AB_START_L", names);
+        Assert.Contains("AC_AB_FINISH_R", names);
+        Assert.DoesNotContain("AC_TIME_0_L", names);
+        Assert.Equal(6, names.Count(n => n.StartsWith("AC_START_", StringComparison.Ordinal)));
+        Assert.Equal("a2b", (string?)ui["run"]);
+    }
+
+    [Fact]
+    public async Task MultilapMapGetsLineAndSectorsInDrivingOrder()
+    {
+        var (_, dummies, ui) = await Convert(1531338);
+        var names = dummies.Select(d => d.Name).ToHashSet();
+
+        Assert.Contains("AC_TIME_0_L", names);
+        Assert.Contains("AC_TIME_4_R", names); // 4 checkpoint blocks -> 4 sectors after the line
+        Assert.DoesNotContain("AC_AB_START_L", names);
+        Assert.Equal("clockwise", (string?)ui["run"]);
+
+        // Grid slots sit behind the start/finish line, facing the same way as the gate.
+        var gateL = dummies.Single(d => d.Name == "AC_TIME_0_L").Transform;
+        var gateR = dummies.Single(d => d.Name == "AC_TIME_0_R").Transform;
+        var gateCenter = (gateL.Translation + gateR.Translation) / 2;
+        var forward = new Vector3(gateL.M31, gateL.M32, gateL.M33);
+        var grid = dummies.Where(d => d.Name.StartsWith("AC_START_", StringComparison.Ordinal)).ToList();
+        Assert.All(grid, d => Assert.True(Vector3.Dot(d.Transform.Translation - gateCenter, forward) < 0, $"{d.Name} is not behind the line"));
+    }
+
+    [Fact]
+    public async Task LapRaceEndingNextToADecorativeFinishIsStillACircuit()
+    {
+        var (_, dummies, ui) = await Convert(11023114); // TWC Copenhagen: 2 laps, finish block 16 m from the lap line
+        Assert.Contains(dummies, d => d.Name == "AC_TIME_0_L");
+        Assert.NotEqual("a2b", (string?)ui["run"]);
+    }
+}

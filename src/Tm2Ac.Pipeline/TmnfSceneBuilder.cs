@@ -41,11 +41,64 @@ public sealed class TmnfSceneBuilder
     }
 
     public int PlacedBlocks { get; private set; }
+
+    public float Scale => _scale;
     public int VisualTriangles => _visual.Values.Sum(m => m.TriangleCount);
     public int CollisionTriangles => _collision.Values.Sum(m => m.TriangleCount);
 
     /// <summary>TM world position → AC position.</summary>
     public Vector3 ToAc(Vector3 tm) => new((tm.X - _center.X) * _scale, (tm.Y - GroundLevel) * _scale, (tm.Z - _center.Z) * _scale);
+
+    /// <summary>
+    /// Height (TM space) of the highest drivable collision surface below <paramref name="tmPosition"/>, searching at most
+    /// <paramref name="maxDrop"/> metres down; null if there is none. Walls don't count. Valid after <see cref="Build"/>.
+    /// </summary>
+    public float? SurfaceHeightBelow(Vector3 tmPosition, float maxDrop)
+    {
+        var ac = ToAc(tmPosition);
+        var p = new Vector2(ac.X, ac.Z);
+        var cx = (int)MathF.Floor(tmPosition.X / ChunkSize);
+        var cz = (int)MathF.Floor(tmPosition.Z / ChunkSize);
+        float? best = null;
+        foreach (var ((key, x, z), mesh) in _collision)
+        {
+            if (key == SurfaceKeys.Wall || Math.Abs(x - cx) > 1 || Math.Abs(z - cz) > 1)
+            {
+                continue;
+            }
+
+            for (var t = 0; t + 2 < mesh.Indices.Count; t += 3)
+            {
+                var a = mesh.Positions[mesh.Indices[t]];
+                var b = mesh.Positions[mesh.Indices[t + 1]];
+                var c = mesh.Positions[mesh.Indices[t + 2]];
+                if (HeightInTriangle(p, a, b, c) is { } y && y <= ac.Y && y >= ac.Y - (maxDrop * _scale) && (best is null || y > best))
+                {
+                    best = y;
+                }
+            }
+        }
+
+        return best is { } h ? (h / _scale) + GroundLevel : null;
+    }
+
+    /// <summary>Y of triangle abc at XZ point p (barycentric), or null when p is outside it.</summary>
+    private static float? HeightInTriangle(Vector2 p, Vector3 a, Vector3 b, Vector3 c)
+    {
+        var v0 = new Vector2(b.X - a.X, b.Z - a.Z);
+        var v1 = new Vector2(c.X - a.X, c.Z - a.Z);
+        var v2 = new Vector2(p.X - a.X, p.Y - a.Z);
+        var den = (v0.X * v1.Y) - (v1.X * v0.Y);
+        if (MathF.Abs(den) < 1e-9f)
+        {
+            return null;
+        }
+
+        var v = ((v2.X * v1.Y) - (v1.X * v2.Y)) / den;
+        var w = ((v0.X * v2.Y) - (v2.X * v0.Y)) / den;
+        var u = 1 - v - w;
+        return u < -1e-4f || v < -1e-4f || w < -1e-4f ? null : (u * a.Y) + (v * b.Y) + (w * c.Y);
+    }
 
     /// <summary>Adds the map's geometry to <paramref name="track"/> (meshes, collision, surfaces, materials, textures).</summary>
     public void Build(TmMap map, AcTrackModel track, ConversionOptions options)

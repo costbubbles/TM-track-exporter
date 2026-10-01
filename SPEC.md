@@ -241,8 +241,9 @@ content/tracks/<trackId>/
 - Re-converting overwrites the folder in place. Uninstall deletes only folders that contain our `conversion-report.json`.
 
 ### 7.2 Route, timing and track type
-- **Type detection (`auto`):** multilap maps, or maps whose start block is also the finish, become **Circuit**. Everything else
-  becomes **A-to-B**.
+- **Type detection (`auto`):** each ghost checkpoint time is matched to its nearest waypoint block. The map is a **Circuit**
+  if the ghost crosses the start/finish (multilap) block, otherwise **A-to-B**. Without a ghost, the map's lap flag or a
+  start/finish block decides.
 - **Circuit:**
   - `AC_TIME_0_L/R` sits at the start/finish line.
   - `AC_TIME_1..n_L/R` sit at ordered checkpoints (sectors).

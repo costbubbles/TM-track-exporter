@@ -6,9 +6,9 @@ _Last updated: 2026-09-30_
 
 | | |
 |---|---|
-| **Phase** | 4 code done (manual check queued). Next is **Phase 5: route, timing, spawns & pits** |
+| **Phase** | 5 code done (manual check queued). Next is **Phase 6: AI line, UI assets, CSP config** |
 | **Release** | none |
-| **Next up** | Gates from start/finish/CP blocks, layout detection, CP order from the ghost, grid/pits behind the start, then install R1/R3 for the user |
+| **Next up** | fast_lane.ai from the ghost (and centerline fallback), CSP ext_config (mood/lighting), --zip export |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -21,8 +21,8 @@ _Last updated: 2026-09-30_
 | 2 TMX client + TMNF parsing | ✅ done (2026-10-01) |
 | 3 TMNF asset extraction | ✅ done (2026-10-01) |
 | 4 Geometry → first TMNF track in AC | ✅ code done, 🟨 in-game check queued |
-| 5 Route, timing, spawns, pits | 🟨 next |
-| 6 AI line, UI assets, CSP config | ⬜ |
+| 5 Route, timing, spawns, pits | ✅ code done, 🟨 in-game check queued |
+| 6 AI line, UI assets, CSP config | 🟨 next |
 | 7 Compatibility → v0.1 (CLI) | ⬜ |
 | 8 Desktop app → v0.2 | ⬜ |
 | 9 TM2020 → v0.3 | ⬜ |
@@ -80,11 +80,18 @@ See [tests/reference-maps.md](tests/reference-maps.md): R1–R7, from the simple
 
 ## Pending manual checks (queued while the user was away)
 
-1. **Phase 4/5: drive converted R1 "Always be mine"** (`tmnf_18451_always_be_mine`, installed once Phase 5 is done):
-   - The track looks like the TMX screenshot, isn't mirrored, and textures look right.
-   - The car can drive the whole route, including the grass section after the start.
-   - Walls, kerbs and inflatables collide.
-   - Note anything invisible, floating or see-through.
+Installed in AC on 2026-10-01: **`tmnf_18451_always_be_mine`** (R1, A to B) and **`tmnf_1531338_rockridge`** (R3, 2-lap circuit).
+If something is badly wrong, roll back with git: each phase is its own commit.
+
+1. **Phase 4 geometry (R1 and R3):**
+   - The tracks look like their TMX screenshots, aren't mirrored, and textures look right (no black or missing materials).
+   - The car can drive the whole route, including R1's grass section after the start.
+   - Walls, kerbs and inflatables collide. Nothing is invisible, floating or see-through.
+2. **Phase 5 timing:**
+   - R1 in Time Attack/Hotlap: the timer starts just after leaving the start, and the run ends at the finish arch.
+   - R3 in Hotlap/Practice: laps count at the start/finish line, and 4 sector splits show.
+   - Grid/pits: Race mode lines cars up behind the start, and "return to pits" works.
+3. **Performance:** load time and FPS on R3 (1.1M visual triangles). Note if it's too heavy.
 
 ## Phase 1 in-game checklist (`Tm2Ac Test Circuit (L)`): ✅ all passed 2026-10-01
 
@@ -147,3 +154,6 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - All 7 reference maps convert, and renders match expected layouts.
   - Fixed TMX cache races under parallel downloads.
   - 115 tests pass.
+- **2026-10-01:** Phase 5.
+  - Route builder: layout detection from ghost crossings, ordered sectors, A-to-B gates, validated grid and pits with a platform fallback, hotlap start and run direction.
+  - Installed R1 and R3 into AC for the user's check. 118 tests pass.

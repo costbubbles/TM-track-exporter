@@ -88,8 +88,15 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         };
 
         builder.Build(map, track, options);
-        AddStartDummies(map, builder, track, issues);
-        track.MapPath = new Centerline(MapPath(map, ghost, builder), closed: map.IsMultilap);
+        var route = new RouteBuilder(builder, SpawnOf, issues);
+        route.Build(map, ghost, track, options);
+        var circuit = route.Layout == RaceLayout.Circuit;
+        track.MapPath = new Centerline(MapPath(map, ghost, builder, circuit), closed: circuit);
+        track.Ui = track.Ui with
+        {
+            Run = circuit ? RunDirection(track.MapPath) : "a2b",
+            Tags = [.. track.Ui.Tags.Where(t => t is not ("circuit" or "a2b")), circuit ? "circuit" : "a2b"],
+        };
 
         var directory = Path.Combine(tracksDirectory, trackId);
         var issueList = issues.ToList();
@@ -116,21 +123,18 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         }
     }
 
-    private void AddStartDummies(TmMap map, TmnfSceneBuilder builder, AcTrackModel track, IssueList issues)
+    /// <summary>"clockwise" or "anticlockwise" as seen on map.png (x right, z down).</summary>
+    private static string RunDirection(Centerline path)
     {
-        var start = map.Waypoints.FirstOrDefault(w => w.Waypoint == TmWaypoint.Start) ?? map.Waypoints.FirstOrDefault(w => w.Waypoint == TmWaypoint.StartFinish);
-        if (start is null)
+        double area = 0;
+        for (var i = 0; i < path.Count; i++)
         {
-            issues.Add(IssueSeverity.Block, "NO_START", "", "The map has no start block");
-            track.Dummies.Add(new AcDummy(AcNames.Start(0), Vector3.UnitY, Vector3.UnitZ));
-            return;
+            var a = path.Points[i];
+            var b = path.Points[(i + 1) % path.Count];
+            area += (a.X * b.Z) - (b.X * a.Z);
         }
 
-        var (position, forward) = SpawnOf(start);
-        var spawn = builder.ToAc(position - new Vector3(0, SpawnDrop, 0));
-        track.Dummies.Add(new AcDummy(AcNames.Start(0), spawn, forward));
-        track.Dummies.Add(new AcDummy(AcNames.Pit(0), spawn, forward));
-        track.Dummies.Add(new AcDummy(AcNames.HotlapStart, spawn, forward));
+        return area > 0 ? "clockwise" : "anticlockwise";
     }
 
     /// <summary>World-space spawn of a start block (TM space).</summary>
@@ -145,12 +149,14 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
     }
 
     /// <summary>Driving line for map.png: the ghost path when available, else start → checkpoints → finish.</summary>
-    private static List<Vector3> MapPath(TmMap map, TmGhost? ghost, TmnfSceneBuilder builder)
+    private static List<Vector3> MapPath(TmMap map, TmGhost? ghost, TmnfSceneBuilder builder, bool firstLapOnly)
     {
         var points = new List<Vector3>();
         if (ghost is not null)
         {
-            foreach (var sample in ghost.Samples)
+            // For circuits, draw one lap: samples up to the first lap's end (race time / laps as an approximation).
+            var lapEnd = firstLapOnly && map.Laps > 1 ? ghost.RaceTimeMs / map.Laps : int.MaxValue;
+            foreach (var sample in ghost.Samples.Where(s => s.TimeMs <= lapEnd))
             {
                 var p = builder.ToAc(sample.Position);
                 if (points.Count == 0 || Vector3.Distance(points[^1], p) >= 2)
