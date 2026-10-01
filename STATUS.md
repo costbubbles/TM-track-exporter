@@ -120,6 +120,12 @@ R1/R3 reinstalled for round 4.
 
 R1/R3 reinstalled for round 5.
 
+**Round 5 feedback (2026-10-01):**
+- Start ramp collision on R1 (rear wheel drops at spawn, phases through when driving back onto the pad). This was **car-specific**: a
+  modded F4 with minimal hitboxes. Other cars are fine apart from slight clipping. The converted geometry was verified sound: no
+  holes at 5 cm resolution, collision matches visuals to the cm, and all bounding spheres are valid. **Known limitation**: AC tyres
+  raycast down from the hub, so TM's steep 66 cm start pad sides are taller than the hub and can be clipped into.
+
 Installed in AC on 2026-10-01: **`tmnf_18451_always_be_mine`** (R1, A to B) and **`tmnf_1531338_rockridge`** (R3, 2-lap circuit).
 If something is badly wrong, roll back with git: each phase is its own commit.
 
@@ -213,3 +219,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - **2026-10-01:** In-game round 2 fixes: grass fringe dropped and dummies snapped to the surface. R1/R3 reinstalled. 134 tests pass.
 - **2026-10-01:** In-game round 3 fixes: child-tree collision (80 → 0 variants missing), downward faces dropped, AI line removed, re-converting cleans the old folder. R1/R3 reinstalled. 135 tests pass.
 - **2026-10-01:** Round 4 fixes: single start spot (hotlap at the start line, 1 pit box by default). Wall fall-through accepted as a known limitation. 135 tests pass.
+- **2026-10-01:** Round 5: start-pad clipping traced to a mod car's minimal hitboxes plus AC's hub raycast with steep steps. Geometry verified sound. Logged as a known limitation.

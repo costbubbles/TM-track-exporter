@@ -83,4 +83,6 @@ GBX.NET.LZO (GPL-3.0).
 - **No AI.** Few Trackmania maps can be driven conventionally in AC, so no AI line is generated.
 - **Hitting thin walls can occasionally drop the car through the map.** This is a limitation of AC's collision with thin geometry
   that many popular track mods share.
+- TM has steep steps taller than a wheel hub (e.g. the raised start pad). AC tyres can clip into them when driven onto from the
+  side, especially cars with minimal collision hitboxes (some mod cars).
 - Boosters don't boost, and special surfaces are approximated (see the compatibility rating).
