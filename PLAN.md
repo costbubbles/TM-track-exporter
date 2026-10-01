@@ -93,13 +93,24 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
 
 ## Phase 4: Geometry assembly, first real TMNF track in AC
 
-- [ ] `TmToAcTransform` (from S5) + block placement (coord, direction, variant), with handedness tests
-- [ ] Implicit geometry: pillars under air blocks, Stadium ground plane, clips (rules from S2)
-- [ ] Scene builder: IR `TrackScene` from parsed map + cache
-- [ ] Mesh batching by material × spatial chunk, the 65k-vertex split, and collision mesh naming `1<KEY>_<chunk>`
-- [ ] Uniform scale option
-- [ ] `tm2ac convert tmnf <id> --install` with a minimal route: start spawn only, no timing yet
+- [x] Block placement (coord, direction, variant, multi-unit footprints) in `BlockPlacement`. TM→AC needs no mirroring.
+      Spawns verified against 7 ghosts, and road pieces join seamlessly in renders
+- [x] Implicit geometry:
+  - Default Stadium grass: the game's own ground quad, filled 5 cm under every non-terrain cell.
+  - Edge walls around the map.
+  - Terrain without meshes (StadiumDirt) drawn from its collision with the game's dirt/grass textures.
+  - Pillars and clips are explicit blocks in TMNF maps, so nothing to generate.
+- [x] Scene builder (`TmnfSceneBuilder`): visual parts batched by material × 128 m chunk, collision by AC surface × chunk
+      (welded vertices), map centred at the origin with TM ground level at y=0. Fallback blocks + MISSING_ASSET issues
+- [x] Mesh batching, 65k split (writer), collision naming `1<KEY><NNNN>`
+- [x] Uniform scale option (`--scale`)
+- [x] `tm2ac convert tmnf <id|file> [--out|--ac-path] [--scale] [--replay] [--no-grass]`: spawn/pit/hotlap at the start block,
+      TMX screenshot as preview, ghost path as map, conversion-report.json with issues
+- [x] `tm2ac dev render <track-folder> <png>`: top-down debug render of collision + dummies
+- [x] All 7 reference maps convert in 3–9 s (R1: 509k visual / 265k collision triangles, 64 MB, R7: 3.8M / 3.0M, 345 MB)
 - [ ] Manual check on the simplest reference map: it looks right, isn't mirrored, surfaces collide, and the car drives
+      (**queued** in STATUS.md, combined with Phase 5)
+- [ ] Later optimisation: KN5 size for big maps (vertex dedupe in visuals, drop dense grass-blade decoration, LODs)
 
 **Exit:** a TMNF track drivable in AC (no timing yet).
 

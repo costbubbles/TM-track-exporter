@@ -49,5 +49,28 @@ internal static class CliCommon
         return path;
     }
 
+    /// <summary>Where track folders go: --out if given, else AC's content/tracks (from --ac-path or Steam).</summary>
+    public static string? ResolveTracksDirectory(DirectoryInfo? outDirectory, DirectoryInfo? acPath)
+    {
+        if (outDirectory is not null)
+        {
+            return outDirectory.FullName;
+        }
+
+        var acRoot = acPath?.FullName ?? (OperatingSystem.IsWindows() ? AssettoCorsa.FindInstall() : null);
+        if (acRoot is null)
+        {
+            Console.Error.WriteLine("Assetto Corsa not found. Pass --ac-path <AC folder> or --out <folder>.");
+            return null;
+        }
+
+        if (AssettoCorsa.FindCspVersion(acRoot) is null)
+        {
+            Console.Error.WriteLine("Warning: Custom Shaders Patch not found; converted tracks need CSP.");
+        }
+
+        return AssettoCorsa.TracksDirectory(acRoot);
+    }
+
     public static string Truncate(string text, int length) => text.Length <= length ? text : text[..(length - 1)] + "…";
 }

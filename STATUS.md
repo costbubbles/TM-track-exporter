@@ -6,9 +6,9 @@ _Last updated: 2026-09-30_
 
 | | |
 |---|---|
-| **Phase** | 3 is ✅ complete. Next is **Phase 4: geometry assembly, first real TMNF track in AC** |
+| **Phase** | 4 code done (manual check queued). Next is **Phase 5: route, timing, spawns & pits** |
 | **Release** | none |
-| **Next up** | Scene builder (blocks → visual/collision chunks, default grass, edge walls, fallbacks), `tm2ac convert`, install R1 |
+| **Next up** | Gates from start/finish/CP blocks, layout detection, CP order from the ghost, grid/pits behind the start, then install R1/R3 for the user |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -20,8 +20,8 @@ _Last updated: 2026-09-30_
 | 1 Hello AC (synthetic track) | ✅ done (user verified all in-game checks 2026-10-01) |
 | 2 TMX client + TMNF parsing | ✅ done (2026-10-01) |
 | 3 TMNF asset extraction | ✅ done (2026-10-01) |
-| 4 Geometry → first TMNF track in AC | 🟨 in progress |
-| 5 Route, timing, spawns, pits | ⬜ |
+| 4 Geometry → first TMNF track in AC | ✅ code done, 🟨 in-game check queued |
+| 5 Route, timing, spawns, pits | 🟨 next |
 | 6 AI line, UI assets, CSP config | ⬜ |
 | 7 Compatibility → v0.1 (CLI) | ⬜ |
 | 8 Desktop app → v0.2 | ⬜ |
@@ -65,6 +65,8 @@ _Last updated: 2026-09-30_
 | 2026-10-01 | New `Tm2Ac.Pipeline` project holds the TM→AC conversion layer (it needs Assets + Gbx + AcTrack together) |
 | 2026-10-01 | Collision triangles steeper than 55° (or facing down) become WALL whatever their TM surface |
 | 2026-10-01 | User away: working autonomously, manual in-game checks are queued in "Pending manual checks", and each phase is committed separately for easy rollback |
+| 2026-10-01 | Every TM surface is valid track (no cut penalties): TM has no track limits and routes cross grass. GRASS grip raised to 0.7 |
+| 2026-10-01 | The default grass fill uses only the 2-triangle ground quad (blades would add ~1.2M triangles per map) |
 
 ## Open questions
 
@@ -78,7 +80,11 @@ See [tests/reference-maps.md](tests/reference-maps.md): R1–R7, from the simple
 
 ## Pending manual checks (queued while the user was away)
 
-_None yet: added as phases need in-game verification._
+1. **Phase 4/5: drive converted R1 "Always be mine"** (`tmnf_18451_always_be_mine`, installed once Phase 5 is done):
+   - The track looks like the TMX screenshot, isn't mirrored, and textures look right.
+   - The car can drive the whole route, including the grass section after the start.
+   - Walls, kerbs and inflatables collide.
+   - Note anything invisible, floating or see-through.
 
 ## Phase 1 in-game checklist (`Tm2Ac Test Circuit (L)`): ✅ all passed 2026-10-01
 
@@ -136,3 +142,8 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - `tm2ac assets check`.
   - Block placement verified against 7 WR ghosts with 0.00 m error.
   - 112 tests pass (8 asset/network).
+- **2026-10-01:** Phase 4.
+  - Scene builder, converter, `tm2ac convert` and `tm2ac dev render`.
+  - All 7 reference maps convert, and renders match expected layouts.
+  - Fixed TMX cache races under parallel downloads.
+  - 115 tests pass.

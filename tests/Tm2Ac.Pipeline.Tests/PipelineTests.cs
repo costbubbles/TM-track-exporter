@@ -205,3 +205,66 @@ public sealed class TmnfAssetTests : IDisposable
         }
     }
 }
+
+public class IssueListTests
+{
+    [Fact]
+    public void AggregatesRepeatsAndSortsBySeverity()
+    {
+        var issues = new IssueList();
+        issues.Add(IssueSeverity.Warn, "MISSING_ASSET", "A", "No geometry for A");
+        issues.Add(IssueSeverity.Warn, "MISSING_ASSET", "A", "No geometry for A");
+        issues.Add(IssueSeverity.Info, "ASSET_FALLBACK", "B", "B uses C");
+        issues.Add(IssueSeverity.Block, "NO_START", "", "No start");
+
+        var list = issues.ToList();
+
+        Assert.Equal(["NO_START", "MISSING_ASSET", "ASSET_FALLBACK"], list.Select(i => i.Code));
+        Assert.Equal("No geometry for A (x2)", list[1].Message);
+    }
+}
+
+[Trait("Category", "Assets")]
+[Trait("Category", "Network")]
+public sealed class TmnfConverterTests : IDisposable
+{
+    private readonly string _out = Path.Combine(Path.GetTempPath(), "tm2ac-convert-" + Guid.NewGuid().ToString("N"));
+
+    public void Dispose()
+    {
+        if (Directory.Exists(_out))
+        {
+            Directory.Delete(_out, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task ConvertsReferenceMapR1()
+    {
+        var tmnf = OperatingSystem.IsWindows() ? TrackmaniaInstalls.FindTmnf() : null;
+        Assert.SkipWhen(tmnf is null, "Needs a local TMNF install.");
+        using var library = TmnfBlockLibrary.Open(tmnf!);
+        using var client = TmxClient.CreateDefault();
+        var source = await ConversionSource.FromTmxAsync(client, TmGame.Tmnf, 18451, cancellationToken: TestContext.Current.CancellationToken);
+
+        var result = new TmnfConverter(library).Convert(source, new ConversionOptions(), _out);
+
+        Assert.Equal("tmnf_18451_always_be_mine", result.TrackId);
+        Assert.Equal(227, result.Blocks);
+        Assert.True(result.VisualTriangles > 100_000);
+        Assert.DoesNotContain(result.Issues, i => i.Code is "MISSING_ASSET" or "NO_START");
+
+        var collision = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, "collision.kn5"));
+        var names = collision.Root.Children.Select(c => c.Name).ToList();
+        Assert.Contains(names, n => n.StartsWith("1ROAD", StringComparison.Ordinal));
+        Assert.Contains(names, n => n.StartsWith("1GRASS", StringComparison.Ordinal));
+        Assert.Contains(names, n => n.StartsWith("1WALL", StringComparison.Ordinal));
+
+        // The AC spawn is the TM start spawn moved to AC space: the map is 1024 m wide, so x/z are centred.
+        var visual = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, result.TrackId + ".kn5"));
+        var start = visual.Root.Children.OfType<Kn5.Kn5DummyNode>().Single(d => d.Name == "AC_START_0");
+        Assert.Equal(820.8f - 512, start.Transform.Translation.X, 1);
+        Assert.Equal(304f - 512, start.Transform.Translation.Z, 1);
+        Assert.Equal(-1f, start.Transform.M31, 3); // facing -X like the ghost
+    }
+}

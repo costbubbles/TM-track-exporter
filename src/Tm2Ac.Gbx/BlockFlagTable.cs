@@ -22,6 +22,9 @@ public sealed class BlockFlagTable
 
     public TmWaypoint Waypoint(string blockName) => _blocks.TryGetValue(blockName, out var flags) ? flags.Waypoint : TmWaypoint.None;
 
+    /// <summary>Look-alike block to use when this block's geometry can't be extracted, if one is configured.</summary>
+    public string? Fallback(string blockName) => _blocks.TryGetValue(blockName, out var flags) ? flags.Fallback : null;
+
     public static BlockFlagTable Parse(string json)
     {
         var file = JsonSerializer.Deserialize<FileDto>(json, Json) ?? throw new InvalidDataException("Empty block flag table.");
@@ -42,4 +45,5 @@ public sealed class BlockFlagTable
 public sealed record BlockFlags
 {
     public TmWaypoint Waypoint { get; init; }
+    public string? Fallback { get; init; }
 }

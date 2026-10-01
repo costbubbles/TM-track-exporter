@@ -17,6 +17,9 @@ public readonly record struct BlockPlacement(Vector3 Origin, int Direction, floa
     public const float BlockWidth = 32f;
     public const float BlockHeight = 8f;
 
+    /// <summary>Leaves positions unchanged (for geometry already in TM world space).</summary>
+    public static BlockPlacement Identity { get; } = new(Vector3.Zero, 0, 0, 0);
+
     /// <param name="footprint">Block size in units (max relative unit offset + 1) along X and Z, before rotation.</param>
     public static BlockPlacement For(GridCoord coord, TmDirection direction, (int X, int Z) footprint) =>
         new(new Vector3(coord.X * BlockWidth, coord.Y * BlockHeight, coord.Z * BlockWidth), (int)direction, footprint.X * BlockWidth, footprint.Z * BlockWidth);

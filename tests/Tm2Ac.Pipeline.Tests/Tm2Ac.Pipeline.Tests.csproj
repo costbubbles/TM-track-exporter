@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Tm2Ac.Pipeline\Tm2Ac.Pipeline.csproj" />
+    <ProjectReference Include="..\..\src\Tm2Ac.Kn5\Tm2Ac.Kn5.csproj" />
   </ItemGroup>
 
 </Project>

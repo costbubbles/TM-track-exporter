@@ -130,7 +130,7 @@ public sealed class TmxClientTests : IDisposable
         Assert.Equal(first, second);
         Assert.Equal("GBX-fake-bytes", await File.ReadAllTextAsync(first, TestContext.Current.CancellationToken));
         Assert.Equal("/trackgbx/18451", Assert.Single(_handler.Requests).Uri.AbsolutePath);
-        Assert.False(File.Exists(first + ".part"));
+        Assert.Empty(Directory.GetFiles(Path.GetDirectoryName(first)!, "*.part"));
     }
 
     [Fact]

@@ -41,6 +41,36 @@ public sealed class MaterialTranslator(Func<string, byte[]?> readTexture)
         return result;
     }
 
+    /// <summary>Game textures for terrain TM generates at runtime (no mesh in the block, e.g. StadiumDirt).</summary>
+    private static readonly Dictionary<string, string> TerrainTextures = new(StringComparer.Ordinal)
+    {
+        ["Dirt"] = @"Stadium\Media\Texture\Image\StadiumDirt1.dds",
+        ["Grass"] = @"Stadium\Media\Texture\Image\StadiumGrass1.dds",
+    };
+
+    /// <summary>Material for drawing collision-only terrain of a TM surface, or null if the surface shouldn't be drawn.</summary>
+    public AcMaterial? ForTerrain(string tmSurface)
+    {
+        var key = "tm2ac_terrain_" + tmSurface;
+        if (_materials.TryGetValue(key, out var cached))
+        {
+            return cached;
+        }
+
+        AcMaterial? material = null;
+        if (TerrainTextures.TryGetValue(tmSurface, out var path))
+        {
+            var textureName = Path.GetFileName(path);
+            if (_textures.ContainsKey(textureName) || readTexture(path) is { } data && _textures.TryAdd(textureName, new AcTexture(textureName, data)))
+            {
+                material = new AcMaterial(key, textureName) { Specular = 0.05f };
+            }
+        }
+
+        _materials[key] = material;
+        return material;
+    }
+
     public static bool IsDropped(string? baseShader) =>
         baseShader is not null && (baseShader.Contains("TAdd", StringComparison.Ordinal)
             || baseShader.Contains(" Add", StringComparison.Ordinal)

@@ -28,18 +28,28 @@ public sealed class TmxCache(string rootDirectory)
         return info.Exists && DateTime.UtcNow - info.LastWriteTimeUtc < timeToLive ? File.ReadAllText(path) : null;
     }
 
-    public static void Write(string path, string text)
-    {
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        File.WriteAllText(path, text);
-    }
+    public static void Write(string path, string text) => Write(path, System.Text.Encoding.UTF8.GetBytes(text));
 
-    /// <summary>Writes atomically (temp file + move) so an interrupted download never leaves a truncated cache entry.</summary>
+    /// <summary>
+    /// Writes atomically via a uniquely named temp file, so an interrupted download never leaves a truncated entry and
+    /// concurrent writers of the same entry (parallel downloads) don't collide. If another writer wins, its copy is kept.
+    /// </summary>
     public static void Write(string path, byte[] data)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        var temp = path + ".part";
+        var temp = $"{path}.{Guid.NewGuid():N}.part";
         File.WriteAllBytes(temp, data);
-        File.Move(temp, path, overwrite: true);
+        try
+        {
+            File.Move(temp, path, overwrite: true);
+        }
+        catch (IOException) when (File.Exists(path))
+        {
+            File.Delete(temp);
+        }
+        catch (UnauthorizedAccessException) when (File.Exists(path))
+        {
+            File.Delete(temp);
+        }
     }
 }

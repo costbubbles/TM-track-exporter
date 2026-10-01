@@ -17,7 +17,10 @@ public class BlockFlagTableTests
     public void ClassifiesTmnfWaypoints(string block, TmWaypoint expected) => Assert.Equal(expected, BlockFlagTable.Tmnf.Waypoint(block));
 
     [Fact]
-    public void EmbeddedTableHasAllEighteenWaypointBlocks() => Assert.Equal(18, BlockFlagTable.Tmnf.Count);
+    public void EmbeddedTableHasAllEighteenWaypointBlocks() => Assert.Equal(18, BlockFlagTable.Tmnf.Count - 4); // + 4 fallback-only entries
+
+    [Fact]
+    public void HasFallbacksForUnparseableBlocks() => Assert.Equal("StadiumRoadMainTurboRouletteLeft", BlockFlagTable.Tmnf.Fallback("StadiumRoadMainTurboLeft"));
 }
 
 public class MoodTests

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="SkiaSharp" />
   </ItemGroup>
 
 </Project>
