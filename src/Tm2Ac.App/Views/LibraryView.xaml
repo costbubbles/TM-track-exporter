@@ -1,0 +1,46 @@
+<UserControl x:Class="Tm2Ac.App.Views.LibraryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Tm2Ac.App.ViewModels">
+    <DockPanel Margin="24,20,24,16">
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Library" Style="{StaticResource Heading}" Margin="0" />
+                <Button Margin="16,0,0,0" Content="Refresh" Command="{Binding RefreshCommand}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Text="{Binding Status}" Style="{StaticResource Dim}" Margin="0,6,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+
+        <ListBox ItemsSource="{Binding Tracks}" VirtualizingPanel.ScrollUnit="Pixel">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type vm:InstalledTrackViewModel}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Border Width="160" Height="90" Background="{StaticResource Panel}" CornerRadius="3" ClipToBounds="True">
+                            <Image Source="{Binding Preview}" Stretch="UniformToFill" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="14,4,0,0">
+                            <TextBlock Text="{Binding Track.Name}" FontWeight="SemiBold" FontSize="14" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Details}" Style="{StaticResource Dim}" Margin="0,2,0,8" TextTrimming="CharacterEllipsis" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Open folder" Margin="0,0,6,0"
+                                        Command="{Binding DataContext.OpenFolderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                <Button Content="Report" Margin="0,0,6,0"
+                                        Command="{Binding DataContext.OpenReportCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                <Button Content="TMX ↗" Margin="0,0,6,0"
+                                        Command="{Binding DataContext.OpenOnTmxCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                <Button Content="Re-convert" Margin="0,0,6,0" ToolTip="Convert again with the default options from Settings"
+                                        Command="{Binding DataContext.ReconvertCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                                <Button Content="Uninstall" Foreground="{StaticResource Error}"
+                                        Command="{Binding DataContext.UninstallCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</UserControl>

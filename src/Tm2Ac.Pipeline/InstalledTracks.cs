@@ -62,7 +62,7 @@ public static class InstalledTracks
                 }
             }
 
-            var source = report?["source"];
+            var source = report?["source"] as JsonObject; // synthetic tracks store a plain string
             var preview = Path.Combine(directory, "ui", "preview.png");
             result.Add(new InstalledTrack(id, directory, name)
             {

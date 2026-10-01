@@ -173,15 +173,20 @@ StadiumInflatableTube, StadiumPlatformTurbo and StadiumRoadMainTurboLeft (`tm2ac
 
 ## Phase 8: Desktop app → **v0.2**
 
-- [ ] WPF shell (MVVM, CommunityToolkit.Mvvm), a DI host shared with the CLI core, and a CM-like dark theme
-- [ ] Browse view: source switcher, search/filter/sort, thumbnails and tag-heuristic badges, with paging
-- [ ] Map detail: screenshots, analysis on select (download map + best replay), options panel with scale presets, and Convert &
-      Install with a progress log and cancel
-- [ ] Library view: installed tracks (from `conversion-report.json`), re-convert, uninstall, open folder, open in CM
-      (verify the `acmanager://` URI)
-- [ ] Settings: paths with auto-detect, cache size/clear, asset extraction with progress, defaults
-- [ ] First-run wizard: detect paths, check CSP, extract assets, show the legal notice
-- [ ] Packaging: a self-contained single-file build or a zip release
+- [x] WPF shell (MVVM, CommunityToolkit.Mvvm) and a CM-like dark theme. A plain composition root (`AppServices`) instead of a
+      generic DI host: the app has three pages and a handful of services
+- [x] Browse view: source switcher (TMNF-X/TMUF-X), name/author search, type and sort chips, thumbnails, "Installed" badges,
+      paging ("Load more"). No compatibility badges (rating removed 2026-10-01)
+- [x] Map detail: screenshot, details, tags, description (BBCode stripped), scale presets + custom scale, starting spots, grass,
+      Convert & Install with a live progress log, warnings and cancel
+- [x] Library view: installed tracks (from `conversion-report.json`), re-convert with the default options, uninstall (confirmed),
+      open folder, open report, open on TMX
+- [ ] Library: open in Content Manager (needs the `acmanager://` URI verified)
+- [x] Settings: AC/TMNF paths with auto-detect and overrides, CSP check, defaults, cache size/clear, open logs. (Asset extraction
+      needs no step: blocks are extracted on demand in ~6 s.)
+- [x] First run: legal notice to accept; if AC or TMNF is missing the app opens on Settings
+- [x] Packaging: self-contained single-file `Tm2Ac.exe` (72 MB), built by CI next to `tm2ac.exe` and attached to releases
+- [ ] User hands-on check of the app (**queued**)
 
 **Exit:** v0.2 tagged.
 

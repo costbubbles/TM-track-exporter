@@ -1,9 +1,17 @@
-﻿<Application x:Class="Tm2Ac.App.App"
+<Application x:Class="Tm2Ac.App.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Tm2Ac.App"
-             StartupUri="MainWindow.xaml">
+             xmlns:v="clr-namespace:Tm2Ac.App.Views"
+             ShutdownMode="OnMainWindowClose">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/Dark.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <v:EqualsConverter x:Key="Equals" />
+            <v:NumbersEqualConverter x:Key="NumbersEqual" />
+            <v:HasValueConverter x:Key="HasValue" />
+            <v:SeverityBrushConverter x:Key="SeverityBrush" />
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

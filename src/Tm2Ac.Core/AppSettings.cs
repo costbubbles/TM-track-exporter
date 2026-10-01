@@ -17,7 +17,12 @@ public sealed class AppSettings
     public string? TmnfPath { get; set; }
 
     public float DefaultScale { get; set; } = 1f;
-    public int DefaultPitboxes { get; set; } = 10;
+    public int DefaultPitboxes { get; set; } = 1;
+    public bool DefaultGrass { get; set; } = true;
+
+    /// <summary>Where <see cref="Save"/> writes when no path is given (null = <see cref="DefaultPath"/>).</summary>
+    [System.Text.Json.Serialization.JsonIgnore]
+    public string? FilePath { get; set; }
 
     /// <summary>The user has acknowledged that converted tracks contain Nadeo assets and are for personal use only.</summary>
     public bool LegalNoticeAccepted { get; set; }
@@ -37,7 +42,7 @@ public sealed class AppSettings
 
     public void Save(string? path = null)
     {
-        path ??= DefaultPath;
+        path ??= FilePath ?? DefaultPath;
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, JsonSerializer.Serialize(this, Json));
     }

@@ -4,22 +4,40 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <AssemblyName>Tm2Ac</AssemblyName>
+    <RootNamespace>Tm2Ac.App</RootNamespace>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <Target Name="RemoveNativePdbsFromPublish" AfterTargets="Publish">
+    <ItemGroup>
+      <PublishedPdbs Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(PublishedPdbs)" />
+  </Target>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Tm2Ac.App.Tests" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Tm2Ac.Core\Tm2Ac.Core.csproj" />
     <ProjectReference Include="..\Tm2Ac.Tmx\Tm2Ac.Tmx.csproj" />
     <ProjectReference Include="..\Tm2Ac.Gbx\Tm2Ac.Gbx.csproj" />
     <ProjectReference Include="..\Tm2Ac.Assets\Tm2Ac.Assets.csproj" />
-    <ProjectReference Include="..\Tm2Ac.Geometry\Tm2Ac.Geometry.csproj" />
-    <ProjectReference Include="..\Tm2Ac.Kn5\Tm2Ac.Kn5.csproj" />
-    <ProjectReference Include="..\Tm2Ac.AcTrack\Tm2Ac.AcTrack.csproj" />
     <ProjectReference Include="..\Tm2Ac.Pipeline\Tm2Ac.Pipeline.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="SkiaSharp" />
   </ItemGroup>
 
 </Project>

@@ -6,9 +6,9 @@ _Last updated: 2026-10-01_
 
 | | |
 |---|---|
-| **Phase** | 7 done. **v0.1 accepted in game**; the release tag waits for the user's go-ahead. Next is Phase 8: WPF desktop app |
-| **Release** | none |
-| **Next up** | Phase 8 desktop app (browse TMX, convert & install, library, settings) |
+| **Phase** | 8 code done: the desktop app works end to end (browse, convert & install, library, settings). Waiting for the user's hands-on check before v0.2 |
+| **Release** | [v0.1.0](https://github.com/costbubbles/TM-track-exporter/releases/tag/v0.1.0) (CLI) |
+| **Next up** | User tries the app; then tag v0.2.0. Open in Content Manager is still open |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -23,8 +23,8 @@ _Last updated: 2026-10-01_
 | 4 Geometry → first TMNF track in AC | ✅ code done, 🟨 in-game check queued |
 | 5 Route, timing, spawns, pits | ✅ code done, 🟨 in-game check queued |
 | 6 AI line, UI assets, CSP config | ✅ code done, 🟨 in-game check queued |
-| 7 Release polish → v0.1 (CLI) | ✅ code done, 🟨 acceptance + release tag waiting for the user |
-| 8 Desktop app → v0.2 | 🟨 next |
+| 7 Release polish → v0.1 (CLI) | ✅ released 2026-10-01 |
+| 8 Desktop app → v0.2 | ✅ code done, 🟨 user check queued |
 | 9 TM2020 → v0.3 | ⬜ |
 
 ## Research spikes
@@ -78,6 +78,7 @@ _Last updated: 2026-10-01_
 | 2026-10-01 | Known limitation accepted: occasional fall-through when hitting thin walls (common in AC track mods) |
 | 2026-10-01 | **No compatibility rating.** The tool ports every map as it is; drivability (jumps, loops, wall rides) isn't judged. Removed the analyzer, `analyze`, `--force` and Red refusal |
 | 2026-10-01 | Jumps over gaps get a `JUMPS` warning with the speed they need; conversion always proceeds |
+| 2026-10-01 | Desktop app uses a plain composition root, not a DI host; navigation is bound two-way so UI Automation can drive it |
 | 2026-10-01 | Default replay is gold-level (fastest replay not faster than gold), not the WR, because WRs use skips |
 
 ## Open questions
@@ -227,3 +228,4 @@ v0.1 run (2026-10-01, by the user over rounds 1–6 on R1, R3 and R2):
 - **2026-10-01:** Removed the compatibility rating at the user's request (R1's finish jump is too far for AC, but that's for the player to find out). Deleted CompatibilityAnalyzer, `tm2ac analyze`, `--force`, the loop/wallride block flags and the rating/ghost stats in the report. 108 offline tests pass.
 - **2026-10-01:** Added the `JUMPS` warning (gap = no surface 10 m below the take-off/landing chord; required speed to the gap's far edge) and gold-level replay selection with a `REPLAY` note in the report. 116 offline tests pass.
 - **2026-10-01:** Round 6: A-to-B timing verified in game on R2 ESL-Hockolicious. v0.1 acceptance done.
+- **2026-10-01:** Released v0.1.0 (CLI) from a tag-triggered CI job. Built the Phase 8 desktop app (browse/detail/convert, library, settings, legal notice). Verified with UI Automation: search, select, Convert & Install into AC, Library and Settings. Fixed InstalledTracks crashing on the synthetic track's string `source`. 127 offline tests pass.

@@ -1,0 +1,45 @@
+<Window x:Class="Tm2Ac.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Tm2Ac.App.ViewModels"
+        xmlns:v="clr-namespace:Tm2Ac.App.Views"
+        Title="Tm2Ac: Trackmania to Assetto Corsa" Width="1280" Height="800" MinWidth="960" MinHeight="600"
+        Background="{StaticResource Bg}" Foreground="{StaticResource Text}" FontFamily="Segoe UI" FontSize="13"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:BrowseViewModel}">
+            <v:BrowseView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LibraryViewModel}">
+            <v:LibraryView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <v:SettingsView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="190" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <Border Background="{StaticResource Panel}" BorderBrush="{StaticResource Line}" BorderThickness="0,0,1,0">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Margin="18,20,18,24">
+                    <TextBlock Text="Tm2Ac" FontSize="22" FontWeight="Bold" Foreground="{StaticResource Accent}" />
+                    <TextBlock Text="Trackmania → Assetto Corsa" Style="{StaticResource Dim}" FontSize="11" />
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Bottom" Margin="18,0,18,14" Style="{StaticResource Dim}" FontSize="11" TextWrapping="Wrap"
+                           Text="Converted tracks are for personal use only." />
+                <StackPanel>
+                    <RadioButton Style="{StaticResource NavButton}" Content="Browse" IsChecked="{Binding IsBrowse}" />
+                    <RadioButton Style="{StaticResource NavButton}" Content="Library" IsChecked="{Binding IsLibrary}" />
+                    <RadioButton Style="{StaticResource NavButton}" Content="Settings" IsChecked="{Binding IsSettings}" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" Focusable="False" />
+    </Grid>
+</Window>

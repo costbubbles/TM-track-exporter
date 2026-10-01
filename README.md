@@ -4,8 +4,8 @@ Convert **Trackmania Nations/United Forever** tracks from [Trackmania Exchange](
 **Assetto Corsa** tracks, including the real block meshes and textures from your own Trackmania install, collision
 surfaces, timing, a start line spawn and Content Manager previews.
 
-> **Status: v0.1 in development.** TMNF Stadium tracks convert end to end from the command line. A desktop app (v0.2)
-> and Trackmania 2020 support (v0.3) are planned. See [PLAN.md](PLAN.md) and [STATUS.md](STATUS.md).
+> **Status:** v0.1 (command line) is released. The desktop app is in testing for v0.2, and Trackmania 2020 support (v0.3) is
+> planned. See [PLAN.md](PLAN.md) and [STATUS.md](STATUS.md).
 
 ## Requirements
 
@@ -14,7 +14,13 @@ surfaces, timing, a start line spawn and Content Manager previews.
 - **TrackMania Nations Forever**. It's free on Steam (app 11020). Its game files are the source of all meshes and textures.
 - Optional: [Content Manager](https://assettocorsa.club/content-manager.html)
 
-## Quick start
+## Desktop app
+
+Run `Tm2Ac.exe` from the [releases](https://github.com/costbubbles/TM-track-exporter/releases). Browse TMNF-X, pick a
+track, choose a scale and press **Convert & Install**. The Library page lists your converted tracks (re-convert, uninstall,
+open folder), and Settings shows what was detected.
+
+## Quick start (command line)
 
 ```powershell
 tm2ac doctor                              # checks AC, CSP, TMNF and the cache

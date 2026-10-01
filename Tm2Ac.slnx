@@ -13,6 +13,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Tm2Ac.AcTrack.Tests/Tm2Ac.AcTrack.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.App.Tests/Tm2Ac.App.Tests.csproj" />
     <Project Path="tests/Tm2Ac.Assets.Tests/Tm2Ac.Assets.Tests.csproj" />
     <Project Path="tests/Tm2Ac.Core.Tests/Tm2Ac.Core.Tests.csproj" />
     <Project Path="tests/Tm2Ac.Gbx.Tests/Tm2Ac.Gbx.Tests.csproj" />

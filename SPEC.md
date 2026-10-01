@@ -63,8 +63,10 @@ tm2ac doctor                                       # check AC/CSP/TM paths and c
   TMX thumbnail, name, author, awards, and length.
 - **Map detail:** screenshots, description, the conversion options above,
   and a **Convert & Install** button with a progress log.
-- **Library:** tracks this tool has installed. Actions are re-convert (with new options), uninstall, open folder,
-  view report, and open in Content Manager **[VERIFY: `acmanager://` URI support]**.
+- **Library:** tracks this tool has installed. Actions are re-convert (with the default options), uninstall, open folder,
+  view report and open on TMX. Open in Content Manager is not done yet **[VERIFY: `acmanager://` URI support]**.
+- **First run:** the legal notice must be accepted; when AC or TMNF isn't found the app opens on Settings.
+  `Tm2Ac.exe --settings <file>` uses another settings file (portable installs, UI tests).
 - **Settings:** AC, TMNF and TM2020 install paths (auto-detected, with overrides), cache location and size, asset
   extraction status, default conversion options.
 - Long operations run asynchronously, report progress, and can be cancelled.

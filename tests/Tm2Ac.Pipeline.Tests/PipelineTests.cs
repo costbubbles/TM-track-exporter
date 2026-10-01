@@ -437,6 +437,48 @@ public class ReplayAndJumpTests
     }
 }
 
+public sealed class InstalledTracksTests : IDisposable
+{
+    private readonly string _root = Directory.CreateTempSubdirectory("tm2ac-installed-").FullName;
+
+    public void Dispose() => Directory.Delete(_root, recursive: true);
+
+    private string Folder(string id, string? report)
+    {
+        var dir = Directory.CreateDirectory(Path.Combine(_root, id)).FullName;
+        if (report is not null)
+        {
+            File.WriteAllText(Path.Combine(dir, AcTrackWriter.ReportFileName), report);
+        }
+
+        return dir;
+    }
+
+    [Fact]
+    public void FindsOurTracksIncludingSyntheticOnesAndIgnoresOthers()
+    {
+        Folder("tmnf_1_a", """{ "generator": "Tm2Ac", "source": { "game": "tmnf", "tmxId": 1 } }""");
+        Folder("tm2ac_test", """{ "generator": "Tm2Ac", "source": "synthetic:test-circuit" }""");
+        Folder("kunos_track", null);
+        Folder("other_tool", """{ "generator": "Other" }""");
+        Folder("broken", "not json");
+
+        var tracks = InstalledTracks.Scan(_root).OrderBy(t => t.TrackId, StringComparer.Ordinal).ToList();
+
+        Assert.Equal(["tm2ac_test", "tmnf_1_a"], tracks.Select(t => t.TrackId));
+        Assert.Equal(("tmnf", 1L), (tracks[1].Game, tracks[1].TmxId));
+        Assert.Equal(("", 0L), (tracks[0].Game, tracks[0].TmxId));
+    }
+
+    [Fact]
+    public void UninstallRefusesFoldersWithoutOurReport()
+    {
+        var dir = Folder("kunos_track", null);
+        Assert.Throws<IOException>(() => InstalledTracks.Uninstall(new InstalledTrack("kunos_track", dir, "x")));
+        Assert.True(Directory.Exists(dir));
+    }
+}
+
 [Trait("Category", "Assets")]
 [Trait("Category", "Network")]
 public sealed class SpawnHeightTests : IDisposable
