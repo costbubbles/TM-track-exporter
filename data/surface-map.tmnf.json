@@ -5,6 +5,15 @@
     "ROAD": {
       "friction": 0.99
     },
+    "KERB": {
+      "friction": 0.92,
+      "wav": "kerb.wav",
+      "wavPitch": 1.3,
+      "ffEffect": "1",
+      "isValidTrack": true,
+      "vibrationGain": 1,
+      "vibrationLength": 1.5
+    },
     "DIRT": {
       "friction": 0.85,
       "dirtAdditive": 0.3,
@@ -46,7 +55,7 @@
       "ac": "ROAD"
     },
     "Rubber": {
-      "ac": "ROAD"
+      "ac": "KERB"
     },
     "Wood": {
       "ac": "ROAD"

@@ -67,13 +67,16 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
     /// <summary>TM spawn points sit at car-centre height; AC dummies sit near the road surface.</summary>
     private const float SpawnDrop = 1.0f;
 
-    public ConversionResult Convert(ConversionSource source, ConversionOptions options, string tracksDirectory)
+    /// <param name="progress">Receives short step descriptions (for logs and UIs).</param>
+    /// <param name="cancellationToken">Checked between steps; nothing is written if cancelled before the final write.</param>
+    public ConversionResult Convert(ConversionSource source, ConversionOptions options, string tracksDirectory, IProgress<string>? progress = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(options);
         var stopwatch = Stopwatch.StartNew();
         var issues = new IssueList();
 
+        progress?.Report("Reading map and replay");
         var map = TmMapReader.Read(source.MapPath);
         var ghost = source.GhostPath is null ? null : TryReadGhost(source.GhostPath, issues);
         if (ghost is null)
@@ -86,6 +89,7 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
         var directory = Path.Combine(tracksDirectory, trackId);
 
         // Cheap checks first: a Red map is refused before any geometry is built.
+        progress?.Report("Checking compatibility");
         var stats = CompatibilityAnalyzer.Analyze(map, ghost, issues);
         if (!options.Force && CompatibilityAnalyzer.Rate(issues.ToList()) == CompatibilityRating.Red)
         {
@@ -103,12 +107,17 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
             PreviewPng = source.Screenshot is { } shot ? Preview(shot) : null,
         };
 
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Report($"Building geometry from {map.Blocks.Count} blocks");
         builder.Build(map, track, options);
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Report("Placing timing gates, grid and pits");
         var route = new RouteBuilder(builder, SpawnOf, issues);
         route.Build(map, ghost, track, options);
         var circuit = route.Layout == RaceLayout.Circuit;
         if (ghost is not null)
         {
+            progress?.Report("Building the AI line");
             track.AiLine = AiLineBuilder.Build(ghost, route.Layout, route.LapLineTimes, builder, issues);
         }
 
@@ -136,6 +145,8 @@ public sealed class TmnfConverter(TmnfBlockLibrary library)
             };
         }
 
+        cancellationToken.ThrowIfCancellationRequested();
+        progress?.Report($"Writing {trackId} ({builder.VisualTriangles:N0} visual triangles)");
         AcTrackWriter.Write(track, directory, report);
         return new ConversionResult(trackId, directory, issueList)
         {

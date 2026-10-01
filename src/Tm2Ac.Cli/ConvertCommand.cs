@@ -77,7 +77,7 @@ internal static class ConvertCommand
             Console.WriteLine("Extracting blocks from TMNF and building the track...");
             using var library = TmnfBlockLibrary.Open(tmnf);
             var options = new ConversionOptions { Scale = scaleValue, Pitboxes = result.GetValue(pitboxes), DefaultGrass = !result.GetValue(noGrass), Force = result.GetValue(force) };
-            var conversion = new TmnfConverter(library).Convert(source, options, tracksDirectory);
+            var conversion = new TmnfConverter(library).Convert(source, options, tracksDirectory, new Progress<string>(step => Console.WriteLine($"  {step}...")), cancellationToken);
 
             if (conversion.Refused)
             {

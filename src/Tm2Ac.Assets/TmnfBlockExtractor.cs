@@ -138,7 +138,8 @@ public sealed class TmnfBlockExtractor(TmnfPakFileSystem fs)
             {
                 var v = visual.Vertices[i];
                 var normal = hasNormals && v.Normal is { } n ? Vector3.Normalize(Vector3.TransformNormal(new Vector3(n.X, n.Y, n.Z), rotation)) : Vector3.UnitY;
-                var uv = uvs is not null && i < uvs.Length ? new Vector2(uvs[i].UV.X, uvs[i].UV.Y) : Vector2.Zero;
+                // TM's V axis runs bottom-up; AC (DirectX) samples top-down, so flip V (verified on road and sign textures, S2).
+                var uv = uvs is not null && i < uvs.Length ? new Vector2(uvs[i].UV.X, 1 - uvs[i].UV.Y) : Vector2.Zero;
                 mesh.AddVertex(Transform(location, v.Position), normal, uv);
             }
 

@@ -69,3 +69,15 @@ the Turbo block land in exactly x∈[0,32], z∈[0,32].
   Rules are to be derived in Phase 4 by comparing with in-game screenshots.
 - Stadium decoration (stands, screens). `Decoration` = ("Day", "Stadium", "Nadeo"). Look at
   `StadiumConstructionDecoration\` in the pak.
+
+## UV convention (found in the first in-game check, 2026-10-01)
+**TM texture V runs bottom-up, so extracted UVs must be flipped (v → 1 − v) for AC.** Without the flip, the road centre
+(material `StadiumRoad`, set 0 v ∈ [0, 0.65]) sampled the signs and bands at the top of `StadiumRoadD.dds` instead of the
+concrete at the bottom. The user saw "kerb texture in the middle, tarmac on the edges", and textures looked mirrored.
+
+Verification on every face showing the "Trackmania United" logo:
+- With V flipped, 32 of 32 are upright.
+- U increases toward the viewer's right (AC convention) on 25 of 32. The other 7 are the backs of double-sided signs.
+
+So there is **no horizontal mirroring**, and only V needed fixing. UV set 0 is the diffuse set. Set 1 is a lightmap atlas and
+set 2 is likely occlusion.

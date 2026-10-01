@@ -67,6 +67,7 @@ public class SurfaceMapTests
     [InlineData("Concrete", "ROAD", null)]
     [InlineData("Dirt", "DIRT", null)]
     [InlineData("Grass", "GRASS", null)]
+    [InlineData("Rubber", "KERB", null)]
     [InlineData("SlidingRubber", "ICE", "SPECIAL_SURFACE_APPROX")]
     [InlineData("Turbo_Deprecated", "ROAD", "BOOSTER_UNSUPPORTED")]
     [InlineData("SomethingNew", "ROAD", "UNKNOWN_SURFACE")]
@@ -177,6 +178,15 @@ public sealed class TmnfAssetTests : IDisposable
     }
 
     [Fact]
+    public void RoadUvsAreFlippedToAcConvention()
+    {
+        // StadiumRoad (road centre) samples the concrete in the lower part of StadiumRoadD.dds; unflipped TM v would hit the signs at the top.
+        Assert.SkipWhen(_library is null, "Needs a local TMNF install.");
+        var road = _library.GetVariant("StadiumRoadMain", isGround: true, variant: 0)!.Parts.Single(p => p.MaterialPath.EndsWith("StadiumRoad.Material.Gbx", StringComparison.OrdinalIgnoreCase));
+        Assert.All(road.Mesh.Uvs, uv => Assert.InRange(uv.Y, 0.3f, 1.01f));
+    }
+
+    [Fact]
     public void IndexesBlocksByIdentNotFileName()
     {
         Assert.SkipWhen(_library is null, "Needs a local TMNF install.");
@@ -247,7 +257,7 @@ public sealed class TmnfConverterTests : IDisposable
         using var client = TmxClient.CreateDefault();
         var source = await ConversionSource.FromTmxAsync(client, TmGame.Tmnf, 18451, cancellationToken: TestContext.Current.CancellationToken);
 
-        var result = new TmnfConverter(library).Convert(source, new ConversionOptions(), _out);
+        var result = new TmnfConverter(library).Convert(source, new ConversionOptions(), _out, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal("tmnf_18451_always_be_mine", result.TrackId);
         Assert.Equal(227, result.Blocks);
@@ -290,7 +300,7 @@ public sealed class RouteTests : IDisposable
         using var library = TmnfBlockLibrary.Open(tmnf!);
         using var client = TmxClient.CreateDefault();
         var source = await ConversionSource.FromTmxAsync(client, TmGame.Tmnf, id, cancellationToken: TestContext.Current.CancellationToken);
-        var result = new TmnfConverter(library).Convert(source, new ConversionOptions { Pitboxes = 6 }, _out);
+        var result = new TmnfConverter(library).Convert(source, new ConversionOptions { Pitboxes = 6 }, _out, cancellationToken: TestContext.Current.CancellationToken);
         var visual = Kn5.Kn5Reader.Read(Path.Combine(result.Directory, result.TrackId + ".kn5"));
         var ui = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(Path.Combine(result.Directory, "ui", "ui_track.json")))!;
         return (result, visual.Root.Children.OfType<Kn5.Kn5DummyNode>().ToList(), ui);

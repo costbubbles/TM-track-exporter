@@ -67,6 +67,8 @@ _Last updated: 2026-09-30_
 | 2026-10-01 | User away: working autonomously, manual in-game checks are queued in "Pending manual checks", and each phase is committed separately for easy rollback |
 | 2026-10-01 | Every TM surface is valid track (no cut penalties): TM has no track limits and routes cross grass. GRASS grip raised to 0.7 |
 | 2026-10-01 | The default grass fill uses only the 2-triangle ground quad (blades would add ~1.2M triangles per map) |
+| 2026-10-01 | TM UVs are V-flipped (v → 1 − v) on extraction. Verified on road and sign textures, with no horizontal mirroring |
+| 2026-10-01 | TM `Rubber` (raised kerbs, inflatables) maps to AC `KERB` (friction 0.92, kerb rumble) |
 
 ## Open questions
 
@@ -79,6 +81,12 @@ _Last updated: 2026-09-30_
 See [tests/reference-maps.md](tests/reference-maps.md): R1–R7, from the simplest A-to-B (18451) to the expected-Red loop map (924307).
 
 ## Pending manual checks (queued while the user was away)
+
+**Round 1 feedback (2026-10-01):**
+- Road centre showed the kerb texture and edges the tarmac, many textures mirrored → **fixed** (TM V axis flip).
+- Edges didn't feel like tarmac → they're TM rubber kerbs, now mapped to AC KERB.
+
+R1/R3 reinstalled for round 2.
 
 Installed in AC on 2026-10-01: **`tmnf_18451_always_be_mine`** (R1, A to B) and **`tmnf_1531338_rockridge`** (R3, 2-lap circuit).
 If something is badly wrong, roll back with git: each phase is its own commit.
@@ -170,3 +178,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
   - Compatibility analyzer (ghost metrics + block features) and `tm2ac analyze`. `convert` refuses Red without `--force`.
   - README, single-file publish config, CI artifact.
   - 130 tests pass.
+- **2026-10-01:** In-game check round 1 found swapped road/kerb textures, caused by the TM V axis. Fixed the UV flip, mapped Rubber to KERB, and reinstalled R1/R3. Also landed the Phase 8 groundwork (AppSettings, InstalledTracks, converter progress/cancellation). 132 tests pass.
