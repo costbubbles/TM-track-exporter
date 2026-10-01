@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Phase 0 spike probe (S1/S5/S6). Not part of Tm2Ac.slnx. Usage: dotnet run [args]: kn5 <file.kn5> | ai <fast_lane.ai> | aitail <fast_lane.ai> <x> <z> -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <AnalysisLevel>none</AnalysisLevel>
+  </PropertyGroup>
+</Project>

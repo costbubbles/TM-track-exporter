@@ -1,0 +1,22 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Tm2Ac.AcTrack/Tm2Ac.AcTrack.csproj" />
+    <Project Path="src/Tm2Ac.App/Tm2Ac.App.csproj" />
+    <Project Path="src/Tm2Ac.Assets/Tm2Ac.Assets.csproj" />
+    <Project Path="src/Tm2Ac.Cli/Tm2Ac.Cli.csproj" />
+    <Project Path="src/Tm2Ac.Core/Tm2Ac.Core.csproj" />
+    <Project Path="src/Tm2Ac.Gbx/Tm2Ac.Gbx.csproj" />
+    <Project Path="src/Tm2Ac.Geometry/Tm2Ac.Geometry.csproj" />
+    <Project Path="src/Tm2Ac.Kn5/Tm2Ac.Kn5.csproj" />
+    <Project Path="src/Tm2Ac.Tmx/Tm2Ac.Tmx.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Tm2Ac.AcTrack.Tests/Tm2Ac.AcTrack.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.Assets.Tests/Tm2Ac.Assets.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.Core.Tests/Tm2Ac.Core.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.Gbx.Tests/Tm2Ac.Gbx.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.Geometry.Tests/Tm2Ac.Geometry.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.Kn5.Tests/Tm2Ac.Kn5.Tests.csproj" />
+    <Project Path="tests/Tm2Ac.Tmx.Tests/Tm2Ac.Tmx.Tests.csproj" />
+  </Folder>
+</Solution>

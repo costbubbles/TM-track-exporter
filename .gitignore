@@ -1,0 +1,24 @@
+# Build
+bin/
+obj/
+*.user
+.vs/
+.vscode/*
+!.vscode/settings.json
+TestResults/
+*.binlog
+publish/
+artifacts/
+
+# NEVER commit Trackmania assets, maps, replays, or converted AC output (see CLAUDE.md "Hard rules")
+*.Gbx
+*.gbx
+*.pak
+*.Pack.Gbx
+*.kn5
+*.dds
+*.ai
+cache/
+output/
+out/
+local/

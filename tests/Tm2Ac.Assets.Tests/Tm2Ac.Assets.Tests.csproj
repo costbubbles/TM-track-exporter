@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Tm2Ac.Assets\Tm2Ac.Assets.csproj" />
+  </ItemGroup>
+
+</Project>

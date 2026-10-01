@@ -1,0 +1,22 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Gbx parsing. GBX.NET.LZO is GPL-3.0-or-later, which is why this project is GPL-3.0. -->
+    <PackageVersion Include="GBX.NET" Version="2.4.5" />
+    <PackageVersion Include="GBX.NET.LZO" Version="2.1.6" />
+    <PackageVersion Include="GBX.NET.ZLib" Version="1.1.2" />
+    <!-- TMNF .pak reading (Blowfish decryption + hashed-name resolution). MIT. -->
+    <PackageVersion Include="GBX.NET.PAK" Version="2.4.4" />
+    <!-- App / CLI -->
+    <PackageVersion Include="System.CommandLine" Version="2.0.12" />
+    <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageVersion Include="SkiaSharp" Version="4.153.1" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
+    <!-- Tests -->
+    <PackageVersion Include="xunit.v3" Version="4.0.1" />
+  </ItemGroup>
+</Project>

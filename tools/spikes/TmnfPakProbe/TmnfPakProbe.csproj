@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Phase 0 spike probe (S2). Not part of Tm2Ac.slnx.
+       Usage: dotnet run [args]: "<TMNF install dir>" "Stadium\Media\Solid\Road\Main\Turbo\Ground.Solid.Gbx" <outDir>
+       Writes OBJ + top-down PNG of the solid to <outDir>. Output contains Nadeo assets: keep it out of the repo. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <AnalysisLevel>none</AnalysisLevel>
+    <NoWarn>CS8602;CS8600</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="GBX.NET" />
+    <PackageReference Include="GBX.NET.LZO" />
+    <PackageReference Include="GBX.NET.ZLib" />
+    <PackageReference Include="GBX.NET.PAK" />
+    <PackageReference Include="SkiaSharp" />
+  </ItemGroup>
+</Project>

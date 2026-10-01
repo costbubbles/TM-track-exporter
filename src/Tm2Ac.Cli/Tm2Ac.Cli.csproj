@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>tm2ac</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tm2Ac.Core\Tm2Ac.Core.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Tmx\Tm2Ac.Tmx.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Gbx\Tm2Ac.Gbx.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Assets\Tm2Ac.Assets.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Geometry\Tm2Ac.Geometry.csproj" />
+    <ProjectReference Include="..\Tm2Ac.Kn5\Tm2Ac.Kn5.csproj" />
+    <ProjectReference Include="..\Tm2Ac.AcTrack\Tm2Ac.AcTrack.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+
+</Project>
