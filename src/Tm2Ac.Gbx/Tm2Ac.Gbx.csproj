@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tm2Ac.Core\Tm2Ac.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GBX.NET" />
+    <PackageReference Include="GBX.NET.LZO" />
+    <PackageReference Include="GBX.NET.ZLib" />
+  </ItemGroup>
+
+</Project>

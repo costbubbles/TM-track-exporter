@@ -1,3 +1,15 @@
+# NEVER commit Trackmania assets, maps, replays, or converted AC output (see CLAUDE.md "Hard rules")
+*.Gbx
+*.gbx
+*.pak
+*.kn5
+*.dds
+*.ai
+
+# The extension rules above must only match files: re-include directories, so project folders
+# like src/Tm2Ac.Gbx/ and src/Tm2Ac.Kn5/ are not ignored. Directory ignores must come AFTER this line.
+!*/
+
 # Build
 bin/
 obj/
@@ -10,14 +22,7 @@ TestResults/
 publish/
 artifacts/
 
-# NEVER commit Trackmania assets, maps, replays, or converted AC output (see CLAUDE.md "Hard rules")
-*.Gbx
-*.gbx
-*.pak
-*.Pack.Gbx
-*.kn5
-*.dds
-*.ai
+# Local caches and conversion output
 cache/
 output/
 out/
