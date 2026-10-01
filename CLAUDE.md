@@ -11,7 +11,7 @@ converts them into Assetto Corsa tracks, and installs them so Content Manager pi
 
 - Sources: **TMNF/TMUF** (tmnf.exchange / tmuf.exchange) first, then **Trackmania 2020** (trackmania.exchange).
 - Geometry comes from the **user's own Trackmania install**. Block meshes and textures are extracted locally and cached.
-- Output is a complete `content/tracks/<id>/` folder: a KN5 we write ourselves, the data inis, an AI line, UI files,
+- Output is a complete `content/tracks/<id>/` folder: a KN5 we write ourselves, the data inis, UI files,
   and a CSP `ext_config.ini`.
 - CSP (Custom Shaders Patch) is a **hard requirement** for output tracks.
 
@@ -99,7 +99,7 @@ Traits: `[Trait("Category", "Network")]` for TMX calls and `[Trait("Category", "
   about the other.
 - Strip TM text formatting codes (`$o`, `$f00`, `$l[...]` and so on) from every user-facing name.
 - AC track folder IDs follow `tm<game>_<tmxId>_<slug>`, for example `tmnf_123456_speed_canyon`.
-- Every conversion produces a `conversion-report.json` (warnings, compatibility, options used) in the output folder.
+- Every conversion produces a `conversion-report.json` (warnings, options used) in the output folder.
 
 ## Keeping docs current
 

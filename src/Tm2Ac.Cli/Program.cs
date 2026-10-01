@@ -7,7 +7,6 @@ var root = new RootCommand("Tm2Ac: convert Trackmania Exchange tracks into Asset
 root.Subcommands.Add(SearchCommand.Create());
 root.Subcommands.Add(InfoCommand.Create());
 root.Subcommands.Add(ConvertCommand.Create());
-root.Subcommands.Add(AnalyzeCommand.Create());
 root.Subcommands.Add(AssetsCommand.Create());
 root.Subcommands.Add(DoctorCommand.Create());
 root.Subcommands.Add(DevCommands.Create());

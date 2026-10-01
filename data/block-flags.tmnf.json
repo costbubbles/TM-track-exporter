@@ -1,6 +1,6 @@
 {
   "environment": "Stadium",
-  "source": "WayPointType of every CGameCtnBlockInfo in TMNF Packs/Stadium.pak (Steam build, extracted 2026-10-01 with tools/spikes/TmnfPakProbe blocks). Blocks not listed have no special flags. Fallbacks (2026-10-01) substitute a look-alike block for the few blocks whose mobils GBX.NET cannot parse. Features (Loop/Wallride) mark blocks whose road needs upside-down or wall driving; used only when there is no replay.",
+  "source": "WayPointType of every CGameCtnBlockInfo in TMNF Packs/Stadium.pak (Steam build, extracted 2026-10-01 with tools/spikes/TmnfPakProbe blocks). Blocks not listed have no special flags. Fallbacks (2026-10-01) substitute a look-alike block for the few blocks whose mobils GBX.NET cannot parse.",
   "blocks": {
     "StadiumCheckpointRingHRoad": {
       "waypoint": "Checkpoint"
@@ -67,48 +67,6 @@
     },
     "StadiumPlatformTurbo": {
       "fallback": "StadiumPlatformRoad"
-    },
-    "StadiumLoopLeft": {
-      "feature": "Loop"
-    },
-    "StadiumLoopRight": {
-      "feature": "Loop"
-    },
-    "StadiumCircuitLoopStart": {
-      "feature": "Loop"
-    },
-    "StadiumPlatformLoopStart": {
-      "feature": "Loop"
-    },
-    "StadiumPlatformLoopEnd": {
-      "feature": "Loop"
-    },
-    "StadiumPlatformWall1": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformWall2": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformWall4": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformGTCurve2Wall1": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformGTCurve2Wall2": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformGTCurve2Wall4": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformGTCurve3Wall1": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformGTCurve3Wall2": {
-      "feature": "Wallride"
-    },
-    "StadiumPlatformGTCurve3Wall4": {
-      "feature": "Wallride"
     }
   }
 }

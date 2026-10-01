@@ -1,6 +1,6 @@
 # Tm2Ac Status
 
-_Last updated: 2026-09-30_
+_Last updated: 2026-10-01_
 
 ## Current state
 
@@ -8,7 +8,7 @@ _Last updated: 2026-09-30_
 |---|---|
 | **Phase** | 7 code done. **v0.1 is ready apart from the user's in-game acceptance** (queued). Next is Phase 8: WPF desktop app |
 | **Release** | none |
-| **Next up** | Phase 8 desktop app (browse TMX, analyze, convert & install, library, settings) |
+| **Next up** | Phase 8 desktop app (browse TMX, convert & install, library, settings) |
 | **Blockers** | none |
 | **Repo** | https://github.com/costbubbles/TM-track-exporter (branch `main`) |
 
@@ -23,7 +23,7 @@ _Last updated: 2026-09-30_
 | 4 Geometry → first TMNF track in AC | ✅ code done, 🟨 in-game check queued |
 | 5 Route, timing, spawns, pits | ✅ code done, 🟨 in-game check queued |
 | 6 AI line, UI assets, CSP config | ✅ code done, 🟨 in-game check queued |
-| 7 Compatibility → v0.1 (CLI) | ✅ code done, 🟨 acceptance + release tag waiting for the user |
+| 7 Release polish → v0.1 (CLI) | ✅ code done, 🟨 acceptance + release tag waiting for the user |
 | 8 Desktop app → v0.2 | 🟨 next |
 | 9 TM2020 → v0.3 | ⬜ |
 
@@ -76,6 +76,7 @@ _Last updated: 2026-09-30_
 | 2026-10-01 | Collision faces with normal.y < -0.2 are dropped (they pushed cars through the road) |
 | 2026-10-01 | One starting spot by default: AC_START_0 = AC_PIT_0 = AC_HOTLAP_START_0 = start block spawn. `--pitboxes N` adds a grid |
 | 2026-10-01 | Known limitation accepted: occasional fall-through when hitting thin walls (common in AC track mods) |
+| 2026-10-01 | **No compatibility rating.** The tool ports every map as it is; drivability (jumps, loops, wall rides) isn't judged. Removed the analyzer, `analyze`, `--force` and Red refusal |
 
 ## Open questions
 
@@ -167,8 +168,7 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - [ ] Not mirrored, and layout matches TMX screenshots
 - [ ] Lap (circuit) or A-to-B (time attack) timing registers, and sectors register
 - [ ] Surfaces feel plausible (road/dirt/grass/ice)
-- [ ] Pits: enter, stop in box, exit
-- [ ] AI completes a lap or run
+- [ ] Every session starts at the start line
 - [ ] Conversion report matches what you see in game (warnings are accurate)
 
 ## Work log
@@ -220,3 +220,4 @@ Regenerate or reinstall with `dotnet run --project src/Tm2Ac.Cli -- dev test-tra
 - **2026-10-01:** In-game round 3 fixes: child-tree collision (80 → 0 variants missing), downward faces dropped, AI line removed, re-converting cleans the old folder. R1/R3 reinstalled. 135 tests pass.
 - **2026-10-01:** Round 4 fixes: single start spot (hotlap at the start line, 1 pit box by default). Wall fall-through accepted as a known limitation. 135 tests pass.
 - **2026-10-01:** Round 5: start-pad clipping traced to a mod car's minimal hitboxes plus AC's hub raycast with steep steps. Geometry verified sound. Logged as a known limitation.
+- **2026-10-01:** Removed the compatibility rating at the user's request (R1's finish jump is too far for AC, but that's for the player to find out). Deleted CompatibilityAnalyzer, `tm2ac analyze`, `--force`, the loop/wallride block flags and the rating/ghost stats in the report. 108 offline tests pass.

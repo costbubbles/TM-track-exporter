@@ -8,7 +8,6 @@ public sealed record InstalledTrack(string TrackId, string Directory, string Nam
 {
     public string Game { get; init; } = "";
     public long TmxId { get; init; }
-    public string Compatibility { get; init; } = "";
     public DateTime ConvertedAtUtc { get; init; }
     public long SizeBytes { get; init; }
     public string? PreviewPath { get; init; }
@@ -69,7 +68,6 @@ public static class InstalledTracks
             {
                 Game = (string?)source?["game"] ?? "",
                 TmxId = source?["tmxId"] is { } tmx ? tmx.GetValue<long>() : 0,
-                Compatibility = (string?)report?["compatibility"] ?? "",
                 ConvertedAtUtc = DateTime.TryParse((string?)report?["convertedAtUtc"] ?? (string?)report?["writtenAtUtc"], System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out var at) ? at : Directory.GetLastWriteTimeUtc(directory),
                 SizeBytes = new DirectoryInfo(directory).EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length),
                 PreviewPath = File.Exists(preview) ? preview : null,

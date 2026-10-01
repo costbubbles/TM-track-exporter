@@ -12,7 +12,8 @@ confirm (see PLAN.md). When a spike disproves something here, update this file.
 - G2. Convert the map into a working Assetto Corsa track that is drivable, timed, has spawns and pits, and has an AI line.
 - G3. Install it into the AC `content/tracks` folder so Content Manager lists it right away.
 - G4. Faithful visuals, using block meshes and textures extracted from the user's own TM install.
-- G5. Tell the user honestly what won't work in AC: a per-map compatibility rating plus specific warnings.
+- G5. Port every map as it is. The tool does not judge whether a route is drivable in AC (decision 2026-10-01); conversion
+  warnings (missing blocks, no replay, ...) go into `conversion-report.json`.
 - G6. Run fully automated, with no Kunos SDK, ksEditor or Blender in the loop.
 
 ### Non-goals (for now)
@@ -27,7 +28,7 @@ confirm (see PLAN.md). When a spike disproves something here, update this file.
 | Version | Scope |
 |---|---|
 | v0.1 (MVP) | TMNF **Stadium** maps, end to end, via CLI. All §7 track features except the AI line (dropped). |
-| v0.2 | WPF GUI: TMX browser, compatibility view, conversion options, library of installed tracks. |
+| v0.2 | WPF GUI: TMX browser, conversion options, library of installed tracks. |
 | v0.3 | Trackmania 2020 maps (blocks + items + embedded custom items). |
 | v0.4 | TMUF non-Stadium environments, CSP Lua gameplay effects (boosters), polish. |
 
@@ -38,8 +39,7 @@ confirm (see PLAN.md). When a spike disproves something here, update this file.
 ### 2.1 CLI (`tm2ac`)
 ```
 tm2ac search  <game> [query] [--author X] [--tag T]... [--multilap] [--order MostAwards|Newest|...] [--limit N]
-tm2ac info    <game> <tmxId | path.Gbx>            # metadata + block/waypoint summary (downloads map); compatibility added in Phase 7
-tm2ac analyze <game> <tmxId | path.Gbx>            # full compatibility report, no output written
+tm2ac info    <game> <tmxId | path.Gbx>            # metadata + block/waypoint summary (downloads map)
 tm2ac convert <game> <tmxId | path.Gbx> [options]
 tm2ac assets  check [tmxIds...]                     # extract all blocks, report gaps (and for given maps)
 tm2ac doctor                                       # check AC/CSP/TM paths and cache state
@@ -55,15 +55,13 @@ tm2ac doctor                                       # check AC/CSP/TM paths and c
 | `--ai-source <replay\|centerline\|none>` | `replay` | Where the AI line comes from (§7.5). |
 | `--replay <tmxReplayId \| path>` | best TMX record | Which ghost to use for the AI line and checkpoint ordering. |
 | `--layout <auto\|circuit\|a2b>` | `auto` | Force the track type (§7.2). |
-| `--pitboxes <n>` | `10` | Number of pits and grid spawns to generate. |
+| `--pitboxes <n>` | `1` | Number of pits and grid spawns to generate (§7.3). |
 | `--scenery <full\|minimal\|none>` | `full` | Include stadium/environment decoration. |
-| `--force` | off | Convert even if the compatibility rating is Red. |
 
 ### 2.2 Desktop app (WPF)
 - **Browse:** pick the source (TMNF-X / TMUF-X / TMX 2020), search by name, author, tags, length and awards, and sort. Results show the
-  TMX thumbnail, name, author, awards, length and a compatibility badge. The badge comes from a tag heuristic until the
-  map has been analyzed, and from the real analysis after that.
-- **Map detail:** screenshots, description, full compatibility report with warnings, the conversion options above,
+  TMX thumbnail, name, author, awards, and length.
+- **Map detail:** screenshots, description, the conversion options above,
   and a **Convert & Install** button with a progress log.
 - **Library:** tracks this tool has installed. Actions are re-convert (with new options), uninstall, open folder,
   view report, and open in Content Manager **[VERIFY: `acmanager://` URI support]**.
@@ -145,7 +143,6 @@ apply.
 - Uses:
   - AI line (§7.5).
   - Checkpoint ordering (§7.2).
-  - Compatibility heuristics: upside-down time, wall contact and airtime (§8).
 
 ### 4.4 Assets from the TM install
 - TMNF (verified, see [S2](docs/research/S2-tmnf-assets.md)):
@@ -208,7 +205,7 @@ TrackScene
   | GT | 2.0 |
   | Formula | 2.5 |
 
-  Scale does not change ramp angles. A warning is raised when scale makes jump gaps impossible (§8).
+  Scale does not change ramp angles. Jumps are not checked: whether a gap can be cleared depends on the car (§8).
 
 ---
 
@@ -295,7 +292,7 @@ content/tracks/<trackId>/
 ### 7.5 AI line: dropped (decision 2026-10-01)
 No `ai/fast_lane.ai` is generated. Very few Trackmania maps can be driven conventionally from start to finish in AC, let
 alone by AI, so an AI line isn't worth its cost (user decision after the first in-game checks). The replay is still used for
-layout detection, checkpoint order (sectors), the minimap path and the compatibility rating. The format research stays in
+layout detection, checkpoint order (sectors), and the minimap path. The format research stays in
 [S6](docs/research/S6-fast-lane-ai.md) in case this is revisited.
 
 ### 7.6 UI and map files
@@ -350,25 +347,15 @@ layout detection, checkpoint order (sectors), the minimap path and the compatibi
 
 ---
 
-## 8. Compatibility analysis
+## 8. Conversion issues (no compatibility rating)
 
-Every map gets a rating plus a list of issues. Detection is data-driven (`data/block-flags.<game>.json`) and also uses
-replay analysis when a ghost is available.
+**Removed (decision 2026-10-01).** The tool ports every map as it is and does not rate whether the route can be driven in
+AC (loops, wall rides, huge jumps). That depends on the car and the driver, and the user decided the tool shouldn't judge it.
+There is no `analyze` command, no `--force` and no refusal.
 
-| Rating | Meaning |
-|---|---|
-| **Green** | Should drive normally in AC (possibly with approximated surfaces). |
-| **Yellow** | Drivable with caveats: approximated special surfaces, boosters that don't boost, steep sections, big jumps. |
-| **Red** | The route needs things AC can't do: loops, wallrides, upside-down sections, reactor flight, engine-off sections, or jumps that are impossible at the chosen scale. Conversion is still allowed with `--force`. |
-
-Issue examples:
-- `LOOP_BLOCK`
-- `WALLRIDE_BLOCK`
-- `UPSIDE_DOWN` (from ghost orientation)
-- `BOOSTER_UNSUPPORTED`
-- `SPECIAL_SURFACE_APPROX`
-- `LONG_AIRTIME` (ghost airborne for more than N s, or a gap longer than X m)
-- `NO_REPLAY_FOR_AI`
+`conversion-report.json` still lists conversion issues (Info/Warn/Block) about the *conversion itself*, for example:
+- `NO_REPLAY` (layout and sectors guessed from the map)
+- `NO_START` / `NO_FINISH`
 - `CHECKPOINT_ORDER_GUESSED`
 - `PIT_PLATFORM_GENERATED`
 - `MISSING_ASSET` (a block mesh is not found in the cache, so we use a bounding-box placeholder)

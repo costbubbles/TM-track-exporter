@@ -372,58 +372,6 @@ public sealed class RouteTests : IDisposable
     }
 }
 
-public class CompatibilityRatingTests
-{
-    [Fact]
-    public void RatingFollowsWorstSeverity()
-    {
-        Assert.Equal(CompatibilityRating.Green, CompatibilityAnalyzer.Rate([new ConversionIssue(IssueSeverity.Info, "X", "")]));
-        Assert.Equal(CompatibilityRating.Yellow, CompatibilityAnalyzer.Rate([new ConversionIssue(IssueSeverity.Info, "X", ""), new ConversionIssue(IssueSeverity.Warn, "Y", "")]));
-        Assert.Equal(CompatibilityRating.Red, CompatibilityAnalyzer.Rate([new ConversionIssue(IssueSeverity.Warn, "Y", ""), new ConversionIssue(IssueSeverity.Block, "Z", "")]));
-    }
-
-    private static TmGhost Ghost(params TmGhostSample[] samples) => new(samples.Length * 100, [], samples, 100);
-
-    private static TmGhostSample Sample(int i, Vector3 up, int wheels, string surface = "Asphalt") => new(i * 100, Vector3.Zero, Vector3.UnitZ, up, wheels, surface);
-
-    [Fact]
-    public void MeasuresUpsideDownWallsAirAndBoosters()
-    {
-        var samples = new List<TmGhostSample>();
-        samples.AddRange(Enumerable.Range(0, 10).Select(i => Sample(i, Vector3.UnitY, 4)));
-        samples.AddRange(Enumerable.Range(10, 5).Select(i => Sample(i, -Vector3.UnitY, 4)));                 // upside down 0.5 s
-        samples.AddRange(Enumerable.Range(15, 3).Select(i => Sample(i, Vector3.UnitX, 4)));                  // on a wall 0.3 s
-        samples.AddRange(Enumerable.Range(18, 25).Select(i => Sample(i, Vector3.UnitY, 0)));                 // 2.5 s flight
-        samples.AddRange(Enumerable.Range(43, 4).Select(i => Sample(i, Vector3.UnitY, 4, "Turbo_Deprecated"))); // 0.4 s boost
-
-        var stats = CompatibilityAnalyzer.Measure(Ghost([.. samples]));
-
-        Assert.Equal((500, 300, 2500, 400), (stats.UpsideDownMs, stats.WallDrivingMs, stats.LongestAirMs, stats.BoosterContactMs));
-    }
-}
-
-[Trait("Category", "Network")]
-public sealed class CompatibilityLiveTests
-{
-    private static async Task<CompatibilityRating> RateMap(long id)
-    {
-        using var client = TmxClient.CreateDefault();
-        var track = await client.GetTrackAsync(TmGame.Tmnf, id, TestContext.Current.CancellationToken);
-        var map = TmMapReader.Read(await client.DownloadMapAsync(TmGame.Tmnf, id, TestContext.Current.CancellationToken));
-        var ghost = TmGhostReader.Read(await client.DownloadReplayAsync(TmGame.Tmnf, track.WrReplayId!.Value, TestContext.Current.CancellationToken));
-        var issues = new IssueList();
-        CompatibilityAnalyzer.Analyze(map, ghost, issues);
-        return CompatibilityAnalyzer.Rate(issues.ToList());
-    }
-
-    [Theory]
-    [InlineData(1531338, CompatibilityRating.Green)]  // R3 Rockridge: flat circuit
-    [InlineData(509742, CompatibilityRating.Yellow)]  // R4 Dirty Dreams: 2.5 s jumps, boosters
-    [InlineData(93481, CompatibilityRating.Red)]      // R5 Smooth Life: loop (upside down 1.4 s)
-    [InlineData(924307, CompatibilityRating.Red)]     // R7 PressForward: loops, 9 s flight
-    public async Task RatesReferenceMaps(long id, CompatibilityRating expected) => Assert.Equal(expected, await RateMap(id));
-}
-
 [Trait("Category", "Assets")]
 [Trait("Category", "Network")]
 public sealed class SpawnHeightTests : IDisposable

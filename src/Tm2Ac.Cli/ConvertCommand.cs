@@ -16,13 +16,12 @@ internal static class ConvertCommand
         var outOption = new Option<DirectoryInfo?>("--out") { Description = "Write the track folder under this directory instead of AC's content/tracks." };
         var acPath = new Option<DirectoryInfo?>("--ac-path") { Description = "Assetto Corsa install folder (auto-detected when omitted)." };
         var scale = new Option<float>("--scale") { Description = "Uniform world scale, 0.25–4 (e.g. 1.5 for road cars, 2 for GT).", DefaultValueFactory = _ => 1f };
-        var replay = new Option<string?>("--replay") { Description = "TMX replay id or a local .Replay.Gbx/.Ghost.Gbx for the AI line and checkpoint order (default: TMX world record)." };
+        var replay = new Option<string?>("--replay") { Description = "TMX replay id or a local .Replay.Gbx/.Ghost.Gbx for checkpoint order and the minimap (default: TMX world record)." };
         var pitboxes = new Option<int>("--pitboxes") { Description = "Grid slots and pit boxes. Default 1: everyone starts at the start line; more adds a grid behind it.", DefaultValueFactory = _ => 1 };
         var noGrass = new Option<bool>("--no-grass") { Description = "Don't fill empty ground cells with the default Stadium grass." };
-        var force = new Option<bool>("--force") { Description = "Convert even if the map is rated Red (loops, wall riding, huge jumps)." };
         var zip = new Option<FileInfo?>("--zip") { Description = "Also write a zip that Content Manager can install by drag and drop." };
 
-        var command = new Command("convert", "Convert a Trackmania map into an Assetto Corsa track and install it.") { game, target, outOption, acPath, scale, replay, pitboxes, noGrass, force, zip };
+        var command = new Command("convert", "Convert a Trackmania map into an Assetto Corsa track and install it.") { game, target, outOption, acPath, scale, replay, pitboxes, noGrass, zip };
         command.SetAction(async (result, cancellationToken) =>
         {
             if (!CliCommon.TryGetGame(result.GetValue(game)!, out var tmGame))
@@ -76,22 +75,10 @@ internal static class ConvertCommand
 
             Console.WriteLine("Extracting blocks from TMNF and building the track...");
             using var library = TmnfBlockLibrary.Open(tmnf);
-            var options = new ConversionOptions { Scale = scaleValue, Pitboxes = result.GetValue(pitboxes), DefaultGrass = !result.GetValue(noGrass), Force = result.GetValue(force) };
+            var options = new ConversionOptions { Scale = scaleValue, Pitboxes = result.GetValue(pitboxes), DefaultGrass = !result.GetValue(noGrass) };
             var conversion = new TmnfConverter(library).Convert(source, options, tracksDirectory, new Progress<string>(step => Console.WriteLine($"  {step}...")), cancellationToken);
 
-            if (conversion.Refused)
-            {
-                Console.WriteLine($"Not converted: rated {conversion.Rating}. The route needs things Assetto Corsa can't do:");
-                foreach (var issue in conversion.Issues.Where(i => i.Severity == IssueSeverity.Block))
-                {
-                    Console.WriteLine($"  [{issue.Severity}] {issue.Code}: {issue.Message}");
-                }
-
-                Console.WriteLine("Use --force to convert anyway.");
-                return 2;
-            }
-
-            Console.WriteLine($"Wrote {conversion.TrackId} to {conversion.Directory}  (compatibility: {conversion.Rating})");
+            Console.WriteLine($"Wrote {conversion.TrackId} to {conversion.Directory}");
             Console.WriteLine($"  {conversion.Blocks} blocks, {conversion.VisualTriangles:N0} visual / {conversion.CollisionTriangles:N0} collision triangles, {conversion.Elapsed.TotalSeconds:0.0} s");
             if (result.GetValue(zip) is { } zipFile)
             {
